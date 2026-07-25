@@ -43,7 +43,7 @@ public class CustomerDAO extends BaseDAO<Customer> {
     }
 
     public List<Customer> searchByName(String searchTerm) throws SQLException {
-        String sql = "SELECT * FROM [dbo].[tbl_Customer] WHERE " +
+        String sql = "SELECT * FROM tbl_Customer WHERE " +
                 "(FirstName LIKE ? OR LastName LIKE ? OR Email LIKE ?) AND IsActive = 1 " +
                 "ORDER BY LastName, FirstName";
         Connection conn = null;
@@ -79,20 +79,20 @@ public class CustomerDAO extends BaseDAO<Customer> {
     }
 
     public int updateLoyaltyPoints(int customerId, int pointsDelta) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Customer] SET LoyaltyPoints = LoyaltyPoints + ?, " +
-                "ModifiedDate = GETDATE() WHERE CustomerID = ?";
+        String sql = "UPDATE tbl_Customer SET LoyaltyPoints = LoyaltyPoints + ?, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE CustomerID = ?";
         return executeUpdate(sql, pointsDelta, customerId);
     }
 
     public int updateLoyaltyTier(int customerId, byte newTier) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Customer] SET LoyaltyTier = ?, ModifiedDate = GETDATE() WHERE CustomerID = ?";
+        String sql = "UPDATE tbl_Customer SET LoyaltyTier = ?, ModifiedDate = CURRENT_TIMESTAMP WHERE CustomerID = ?";
         return executeUpdate(sql, newTier, customerId);
     }
 
     public int recordVisit(int customerId, BigDecimal spendAmount) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Customer] SET VisitCount = VisitCount + 1, " +
-                "TotalSpend = TotalSpend + ?, LastVisitDate = GETDATE(), " +
-                "ModifiedDate = GETDATE() WHERE CustomerID = ?";
+        String sql = "UPDATE tbl_Customer SET VisitCount = VisitCount + 1, " +
+                "TotalSpend = TotalSpend + ?, LastVisitDate = CURRENT_TIMESTAMP, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE CustomerID = ?";
         return executeUpdate(sql, spendAmount, customerId);
     }
 
@@ -106,8 +106,8 @@ public class CustomerDAO extends BaseDAO<Customer> {
     }
 
     public List<Customer> findInactiveCustomers(int daysSinceLastVisit) throws SQLException {
-        String sql = "SELECT * FROM [dbo].[tbl_Customer] WHERE IsActive = 1 " +
-                "AND LastVisitDate < DATEADD(day, ?, GETDATE()) " +
+        String sql = "SELECT * FROM tbl_Customer WHERE IsActive = 1 " +
+                "AND LastVisitDate < CURRENT_TIMESTAMP - (? || ' days')::interval " +
                 "ORDER BY LastVisitDate ASC";
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -126,8 +126,8 @@ public class CustomerDAO extends BaseDAO<Customer> {
     }
 
     public String generateCustomerNumber() throws SQLException {
-        String sql = "SELECT 'C' + RIGHT('00000000' + CAST(ISNULL(MAX(CAST(SUBSTRING(CustomerNumber, 2, 8) AS INT)), 0) + 1 AS VARCHAR), 8) " +
-                "FROM [dbo].[tbl_Customer]";
+        String sql = "SELECT 'C' || RIGHT('00000000' || CAST(COALESCE(MAX(CAST(SUBSTRING(CustomerNumber, 2, 8) AS INT)), 0) + 1 AS VARCHAR), 8) " +
+                "FROM tbl_Customer";
         return executeScalar(sql, String.class);
     }
 
@@ -136,7 +136,7 @@ public class CustomerDAO extends BaseDAO<Customer> {
     }
 
     public BigDecimal getAverageSpend() throws SQLException {
-        String sql = "SELECT AVG(TotalSpend) FROM [dbo].[tbl_Customer] WHERE IsActive = 1 AND VisitCount > 0";
+        String sql = "SELECT AVG(TotalSpend) FROM tbl_Customer WHERE IsActive = 1 AND VisitCount > 0";
         return executeScalar(sql, BigDecimal.class);
     }
 }

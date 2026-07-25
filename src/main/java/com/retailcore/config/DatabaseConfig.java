@@ -34,6 +34,7 @@ public class DatabaseConfig {
         loadProperties();
 
         String url = properties.getProperty("db.url", "jdbc:sqlserver://localhost:1433;databaseName=RetailCoreDB");
+        String driverClass = properties.getProperty("db.driver", "").trim();
         String username = properties.getProperty("db.username", "sa");
         String password = properties.getProperty("db.password", "");
         int initialPoolSize = Integer.parseInt(properties.getProperty("db.pool.initial", "5"));
@@ -42,7 +43,7 @@ public class DatabaseConfig {
         ConnectionPool pool = ConnectionPool.getInstance();
         pool.setConnectionTimeout(Long.parseLong(properties.getProperty("db.connection.timeout", "30000")));
         pool.setValidationTimeout(Long.parseLong(properties.getProperty("db.validation.timeout", "5000")));
-        pool.initialize(url, username, password, initialPoolSize, maxPoolSize);
+        pool.initialize(url, username, password, initialPoolSize, maxPoolSize, driverClass);
 
         initialized = true;
     }

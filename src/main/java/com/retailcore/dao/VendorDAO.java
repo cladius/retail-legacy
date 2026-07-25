@@ -39,9 +39,9 @@ public class VendorDAO extends BaseDAO<Vendor> {
     public List<Map<String, Object>> getVendorOrderSummary() throws SQLException {
         String sql = "SELECT v.VendorID, v.VendorName, v.VendorCode, " +
                 "COUNT(po.PurchaseOrderID) AS OrderCount, " +
-                "ISNULL(SUM(po.TotalAmount), 0) AS TotalOrdered " +
-                "FROM [dbo].[tbl_Vendor] v " +
-                "LEFT JOIN [dbo].[tbl_PurchaseOrder] po ON v.VendorID = po.VendorID " +
+                "COALESCE(SUM(po.TotalAmount), 0) AS TotalOrdered " +
+                "FROM tbl_Vendor v " +
+                "LEFT JOIN tbl_PurchaseOrder po ON v.VendorID = po.VendorID " +
                 "WHERE v.IsActive = 1 " +
                 "GROUP BY v.VendorID, v.VendorName, v.VendorCode " +
                 "ORDER BY TotalOrdered DESC";
@@ -49,7 +49,7 @@ public class VendorDAO extends BaseDAO<Vendor> {
     }
 
     public int getProductCount(int vendorId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM [dbo].[tbl_Product] WHERE VendorID = ? AND Status = 1";
+        String sql = "SELECT COUNT(*) FROM tbl_Product WHERE VendorID = ? AND Status = 1";
         return executeScalar(sql, Integer.class, vendorId);
     }
 }

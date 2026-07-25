@@ -41,7 +41,7 @@ public class EntityMetadata {
             metadata.catalogName = tableAnnotation.catalog();
         } else {
             metadata.tableName = clazz.getSimpleName();
-            metadata.schemaName = "dbo";
+            metadata.schemaName = "public";
             metadata.catalogName = "";
         }
 
@@ -96,12 +96,12 @@ public class EntityMetadata {
     public String getFullTableName() {
         StringBuilder sb = new StringBuilder();
         if (catalogName != null && !catalogName.isEmpty()) {
-            sb.append("[").append(catalogName).append("].");
+            sb.append(catalogName).append(".");
         }
         if (schemaName != null && !schemaName.isEmpty()) {
-            sb.append("[").append(schemaName).append("].");
+            sb.append(schemaName).append(".");
         }
-        sb.append("[").append(tableName).append("]");
+        sb.append(tableName);
         return sb.toString();
     }
 

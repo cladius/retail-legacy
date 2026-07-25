@@ -37,19 +37,19 @@ public class GiftCardDAO extends BaseDAO<GiftCard> {
     }
 
     public int deductBalance(int giftCardId, BigDecimal amount) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_GiftCard] SET CurrentBalance = CurrentBalance - ?, " +
-                "ModifiedDate = GETDATE() WHERE GiftCardID = ? AND CurrentBalance >= ? AND Status = 1";
+        String sql = "UPDATE tbl_GiftCard SET CurrentBalance = CurrentBalance - ?, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE GiftCardID = ? AND CurrentBalance >= ? AND Status = 1";
         return executeUpdate(sql, amount, giftCardId, amount);
     }
 
     public int addBalance(int giftCardId, BigDecimal amount) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_GiftCard] SET CurrentBalance = CurrentBalance + ?, " +
-                "ModifiedDate = GETDATE() WHERE GiftCardID = ? AND Status = 1";
+        String sql = "UPDATE tbl_GiftCard SET CurrentBalance = CurrentBalance + ?, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE GiftCardID = ? AND Status = 1";
         return executeUpdate(sql, amount, giftCardId);
     }
 
     public int deactivate(int giftCardId) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_GiftCard] SET Status = 2, ModifiedDate = GETDATE() WHERE GiftCardID = ?";
+        String sql = "UPDATE tbl_GiftCard SET Status = 2, ModifiedDate = CURRENT_TIMESTAMP WHERE GiftCardID = ?";
         return executeUpdate(sql, giftCardId);
     }
 
@@ -58,12 +58,12 @@ public class GiftCardDAO extends BaseDAO<GiftCard> {
                 .from(metadata.getFullTableName())
                 .whereEquals("Status", 1)
                 .whereIsNotNull("ExpirationDate")
-                .where("[ExpirationDate] < CAST(GETDATE() AS DATE)");
+                .where("ExpirationDate < CURRENT_DATE");
         return findByQuery(qb);
     }
 
     public BigDecimal getTotalOutstandingBalance() throws SQLException {
-        String sql = "SELECT SUM(CurrentBalance) FROM [dbo].[tbl_GiftCard] WHERE Status = 1";
+        String sql = "SELECT SUM(CurrentBalance) FROM tbl_GiftCard WHERE Status = 1";
         return executeScalar(sql, BigDecimal.class);
     }
 }

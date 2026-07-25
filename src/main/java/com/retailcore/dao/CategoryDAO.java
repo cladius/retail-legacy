@@ -59,7 +59,7 @@ public class CategoryDAO extends BaseDAO<Category> {
     }
 
     public int getProductCount(int categoryId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM [dbo].[tbl_Product] WHERE CategoryID = ? AND Status = 1";
+        String sql = "SELECT COUNT(*) FROM tbl_Product WHERE CategoryID = ? AND Status = 1";
         return executeScalar(sql, Integer.class, categoryId);
     }
 }

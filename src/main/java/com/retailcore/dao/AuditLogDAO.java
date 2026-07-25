@@ -53,12 +53,12 @@ public class AuditLogDAO extends BaseDAO<AuditLog> {
     }
 
     public void logAction(String tableName, int recordId, String action, String oldValues, String newValues, Integer employeeId) throws SQLException {
-        String sql = "INSERT INTO [dbo].[tbl_AuditLog] (TableName, RecordID, Action, OldValues, NewValues, EmployeeID) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tbl_AuditLog (TableName, RecordID, Action, OldValues, NewValues, EmployeeID) VALUES (?, ?, ?, ?, ?, ?)";
         executeUpdate(sql, tableName, recordId, action, oldValues, newValues, employeeId);
     }
 
     public int purgeOldLogs(int daysToKeep) throws SQLException {
-        String sql = "DELETE FROM [dbo].[tbl_AuditLog] WHERE CreatedDate < DATEADD(day, ?, GETDATE())";
+        String sql = "DELETE FROM tbl_AuditLog WHERE CreatedDate < CURRENT_TIMESTAMP - (? || ' days')::interval";
         return executeUpdate(sql, -daysToKeep);
     }
 }

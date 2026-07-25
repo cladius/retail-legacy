@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Table {
     String name();
-    String schema() default "dbo";
+    String schema() default "public";
     String catalog() default "";
 }

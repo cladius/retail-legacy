@@ -32,8 +32,8 @@ public class PromotionDAO extends BaseDAO<Promotion> {
     }
 
     public List<Promotion> findActivePromotions() throws SQLException {
-        String sql = "SELECT * FROM [dbo].[tbl_Promotion] WHERE IsActive = 1 " +
-                "AND StartDate <= GETDATE() AND EndDate >= GETDATE() " +
+        String sql = "SELECT * FROM tbl_Promotion WHERE IsActive = 1 " +
+                "AND StartDate <= CURRENT_TIMESTAMP AND EndDate >= CURRENT_TIMESTAMP " +
                 "ORDER BY StartDate ASC";
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -67,9 +67,9 @@ public class PromotionDAO extends BaseDAO<Promotion> {
     }
 
     public List<Promotion> findByStore(int storeId) throws SQLException {
-        String sql = "SELECT * FROM [dbo].[tbl_Promotion] WHERE IsActive = 1 " +
+        String sql = "SELECT * FROM tbl_Promotion WHERE IsActive = 1 " +
                 "AND (ApplicableStoreID IS NULL OR ApplicableStoreID = ?) " +
-                "AND StartDate <= GETDATE() AND EndDate >= GETDATE()";
+                "AND StartDate <= CURRENT_TIMESTAMP AND EndDate >= CURRENT_TIMESTAMP";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -87,18 +87,18 @@ public class PromotionDAO extends BaseDAO<Promotion> {
     }
 
     public int incrementUsage(int promotionId) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Promotion] SET UsageCount = UsageCount + 1, " +
-                "ModifiedDate = GETDATE() WHERE PromotionID = ?";
+        String sql = "UPDATE tbl_Promotion SET UsageCount = UsageCount + 1, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE PromotionID = ?";
         return executeUpdate(sql, promotionId);
     }
 
     public boolean isPromotionValid(int promotionId, int customerId) throws SQLException {
         String sql = "SELECT CASE WHEN EXISTS (" +
-                "SELECT 1 FROM [dbo].[tbl_Promotion] p WHERE p.PromotionID = ? AND p.IsActive = 1 " +
-                "AND p.StartDate <= GETDATE() AND p.EndDate >= GETDATE() " +
+                "SELECT 1 FROM tbl_Promotion p WHERE p.PromotionID = ? AND p.IsActive = 1 " +
+                "AND p.StartDate <= CURRENT_TIMESTAMP AND p.EndDate >= CURRENT_TIMESTAMP " +
                 "AND (p.UsageLimit IS NULL OR p.UsageCount < p.UsageLimit) " +
                 "AND (p.RequiresLoyaltyTier IS NULL OR EXISTS (" +
-                "SELECT 1 FROM [dbo].[tbl_Customer] c WHERE c.CustomerID = ? AND c.LoyaltyTier >= p.RequiresLoyaltyTier))" +
+                "SELECT 1 FROM tbl_Customer c WHERE c.CustomerID = ? AND c.LoyaltyTier >= p.RequiresLoyaltyTier))" +
                 ") THEN 1 ELSE 0 END";
         return executeScalar(sql, Boolean.class, promotionId, customerId);
     }

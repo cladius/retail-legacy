@@ -26,7 +26,7 @@ public abstract class BaseDAO<T> {
     public T findById(Object id) throws SQLException {
         String sql = QueryBuilder.select()
                 .from(metadata.getFullTableName())
-                .where("[" + metadata.getPrimaryKeyColumn().getColumnName() + "] = ?", id)
+                .where(metadata.getPrimaryKeyColumn().getColumnName() + " = ?", id)
                 .build();
 
         Connection conn = null;
@@ -74,7 +74,7 @@ public abstract class BaseDAO<T> {
     public List<T> findAllActive() throws SQLException {
         String sql = QueryBuilder.select()
                 .from(metadata.getFullTableName())
-                .where("[IsActive] = ?", true)
+                .where("IsActive = ?", true)
                 .build();
 
         Connection conn = null;
@@ -97,7 +97,7 @@ public abstract class BaseDAO<T> {
     public List<T> findByColumn(String column, Object value) throws SQLException {
         String sql = QueryBuilder.select()
                 .from(metadata.getFullTableName())
-                .where("[" + column + "] = ?", value)
+                .where(column + " = ?", value)
                 .build();
 
         Connection conn = null;
@@ -121,7 +121,7 @@ public abstract class BaseDAO<T> {
         String sql = QueryBuilder.select()
                 .top(1)
                 .from(metadata.getFullTableName())
-                .where("[" + column + "] = ?", value)
+                .where(column + " = ?", value)
                 .build();
 
         Connection conn = null;
@@ -204,7 +204,7 @@ public abstract class BaseDAO<T> {
                 columns.append(", ");
                 values.append(", ");
             }
-            columns.append("[").append(col.getColumnName()).append("]");
+            columns.append(col.getColumnName());
             values.append("?");
             params.add(value);
         }
@@ -261,7 +261,7 @@ public abstract class BaseDAO<T> {
             if (i > 0) {
                 setClause.append(", ");
             }
-            setClause.append("[").append(col.getColumnName()).append("] = ?");
+            setClause.append(col.getColumnName()).append(" = ?");
             params.add(value);
         }
 
@@ -270,7 +270,7 @@ public abstract class BaseDAO<T> {
 
         String sql = "UPDATE " + metadata.getFullTableName() +
                 " SET " + setClause +
-                " WHERE [" + pkColumn.getColumnName() + "] = ?";
+                " WHERE " + pkColumn.getColumnName() + " = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -311,7 +311,7 @@ public abstract class BaseDAO<T> {
 
     public int delete(Object id) throws SQLException {
         String sql = "DELETE FROM " + metadata.getFullTableName() +
-                " WHERE [" + metadata.getPrimaryKeyColumn().getColumnName() + "] = ?";
+                " WHERE " + metadata.getPrimaryKeyColumn().getColumnName() + " = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -335,8 +335,8 @@ public abstract class BaseDAO<T> {
 
     public int softDelete(Object id) throws SQLException {
         String sql = "UPDATE " + metadata.getFullTableName() +
-                " SET [IsActive] = 0, [ModifiedDate] = GETDATE()" +
-                " WHERE [" + metadata.getPrimaryKeyColumn().getColumnName() + "] = ?";
+                " SET IsActive = 0, ModifiedDate = CURRENT_TIMESTAMP" +
+                " WHERE " + metadata.getPrimaryKeyColumn().getColumnName() + " = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -373,7 +373,7 @@ public abstract class BaseDAO<T> {
 
     public int countByColumn(String column, Object value) throws SQLException {
         String sql = "SELECT COUNT(*) FROM " + metadata.getFullTableName() +
-                " WHERE [" + column + "] = ?";
+                " WHERE " + column + " = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -394,7 +394,7 @@ public abstract class BaseDAO<T> {
 
     public boolean exists(Object id) throws SQLException {
         String sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM " + metadata.getFullTableName() +
-                " WHERE [" + metadata.getPrimaryKeyColumn().getColumnName() + "] = ?) THEN 1 ELSE 0 END";
+                " WHERE " + metadata.getPrimaryKeyColumn().getColumnName() + " = ?) THEN 1 ELSE 0 END";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -427,7 +427,7 @@ public abstract class BaseDAO<T> {
                 columns.append(", ");
                 values.append(", ");
             }
-            columns.append("[").append(insertableColumns.get(i).getColumnName()).append("]");
+            columns.append(insertableColumns.get(i).getColumnName());
             values.append("?");
         }
 
@@ -469,7 +469,7 @@ public abstract class BaseDAO<T> {
         }
 
         String sql = "DELETE FROM " + metadata.getFullTableName() +
-                " WHERE [" + metadata.getPrimaryKeyColumn().getColumnName() + "] IN (" + placeholders + ")";
+                " WHERE " + metadata.getPrimaryKeyColumn().getColumnName() + " IN (" + placeholders + ")";
 
         Connection conn = null;
         PreparedStatement stmt = null;
