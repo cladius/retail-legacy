@@ -462,7 +462,6 @@ public class QueryBuilder {
             case SELECT:
                 sql.append("SELECT ");
                 if (distinct) sql.append("DISTINCT ");
-                if (topCount > 0) sql.append("LIMIT ").append(topCount).append(" ");
                 if (selectClause.length() > 0) {
                     sql.append(selectClause);
                 } else {
@@ -484,6 +483,9 @@ public class QueryBuilder {
                         sql.append(" ORDER BY (SELECT NULL)");
                     }
                     sql.append(" OFFSET ").append(offsetCount);
+                } else if (topCount > 0) {
+                    // PostgreSQL requires LIMIT after the FROM/WHERE clauses.
+                    sql.append(" LIMIT ").append(topCount);
                 }
                 break;
 
