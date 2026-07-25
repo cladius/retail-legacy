@@ -1,0 +1,49 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "7cf5209ab23b",
+  "strategy": "manual-commit",
+  "branch": "migration/alloydb-postgres",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "SCRATCHPAD.md",
+    "pom.xml",
+    "sql/schema.sql",
+    "sql/seed.sql",
+    "src/main/java/com/retailcore/config/DatabaseConfig.java",
+    "src/main/java/com/retailcore/dao/AuditLogDAO.java",
+    "src/main/java/com/retailcore/dao/CategoryDAO.java",
+    "src/main/java/com/retailcore/dao/CustomerDAO.java",
+    "src/main/java/com/retailcore/dao/EmployeeDAO.java",
+    "src/main/java/com/retailcore/dao/GiftCardDAO.java",
+    "src/main/java/com/retailcore/dao/InventoryDAO.java",
+    "src/main/java/com/retailcore/dao/ProductDAO.java",
+    "src/main/java/com/retailcore/dao/PromotionDAO.java",
+    "src/main/java/com/retailcore/dao/PurchaseOrderDAO.java",
+    "src/main/java/com/retailcore/dao/StoreDAO.java",
+    "src/main/java/com/retailcore/dao/TransactionDAO.java",
+    "src/main/java/com/retailcore/dao/VendorDAO.java",
+    "src/main/java/com/retailcore/orm/BaseDAO.java",
+    "src/main/java/com/retailcore/orm/ConnectionPool.java",
+    "src/main/java/com/retailcore/orm/EntityMetadata.java",
+    "src/main/java/com/retailcore/orm/QueryBuilder.java",
+    "src/main/java/com/retailcore/orm/Table.java",
+    "src/main/java/com/retailcore/service/InventoryService.java",
+    "src/main/resources/database.properties"
+  ],
+  "sessions": [
+    {
+      "metadata": "/7c/f5209ab23b/0/metadata.json",
+      "transcript": "/7c/f5209ab23b/0/full.jsonl",
+      "compact_transcript": "/7c/f5209ab23b/0/transcript.jsonl",
+      "content_hash": "/7c/f5209ab23b/0/content_hash.txt",
+      "prompt": "/7c/f5209ab23b/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 42489,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 335360,
+    "output_tokens": 2969,
+    "api_call_count": 10
+  }
+}
