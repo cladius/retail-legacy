@@ -30,3 +30,13 @@ GO
 -- Grant database owner permissions to the user
 ALTER ROLE db_owner ADD MEMBER java_user;
 GO
+
+# Sample Trigger Hazel
+Help me build my application
+Replace database from MS SQL Server of this application to use AlloyDB from GCP https://github.com/sneha-hazel-ai/retail-legacy/tree/main/src/main
+
+# AlloyDB
+
+free-trial-cluster
+postgres
+(65R"\D5uC(jhnC5

@@ -16,6 +16,7 @@ public class ConnectionPool {
     private String url;
     private String username;
     private String password;
+    private String driverClass;
     private int maxPoolSize;
     private int initialPoolSize;
     private AtomicInteger totalCreated;
@@ -40,23 +41,38 @@ public class ConnectionPool {
     }
 
     public void initialize(String url, String username, String password, int initialSize, int maxSize) throws SQLException {
+        initialize(url, username, password, initialSize, maxSize, null);
+    }
+
+    public void initialize(String url, String username, String password, int initialSize, int maxSize, String driverClass) throws SQLException {
         this.url = url;
         this.username = username;
         this.password = password;
         this.initialPoolSize = initialSize;
         this.maxPoolSize = maxSize;
+        this.driverClass = resolveDriverClass(driverClass, url);
         this.availableConnections = new ArrayBlockingQueue<>(maxSize);
         this.usedConnections = new ArrayBlockingQueue<>(maxSize);
 
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName(this.driverClass);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("SQL Server JDBC driver not found", e);
+            throw new SQLException("JDBC driver not found: " + this.driverClass, e);
         }
 
         for (int i = 0; i < initialSize; i++) {
             availableConnections.add(createConnection());
         }
+    }
+
+    private String resolveDriverClass(String driverClass, String url) {
+        if (driverClass != null && !driverClass.trim().isEmpty()) {
+            return driverClass.trim();
+        }
+        if (url != null && url.startsWith("jdbc:postgresql")) {
+            return "org.postgresql.Driver";
+        }
+        return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
     }
 
     private Connection createConnection() throws SQLException {

@@ -88,7 +88,7 @@ public class TransactionDAO extends BaseDAO<Transaction> {
             TransactionManager.begin();
             conn = TransactionManager.getConnectionForOperation();
 
-            String txnSql = "INSERT INTO [dbo].[tbl_Transaction] " +
+            String txnSql = "INSERT INTO tbl_Transaction " +
                     "(TransactionNumber, StoreID, RegisterNumber, EmployeeID, CustomerID, " +
                     "TransactionDate, TransactionType, SubTotal, DiscountTotal, TaxTotal, " +
                     "GrandTotal, TenderAmount, ChangeAmount, PromotionID, " +
@@ -124,7 +124,7 @@ public class TransactionDAO extends BaseDAO<Transaction> {
             }
             rs.close();
 
-            String itemSql = "INSERT INTO [dbo].[tbl_TransactionItem] " +
+            String itemSql = "INSERT INTO tbl_TransactionItem " +
                     "(TransactionID, ProductID, Quantity, UnitPrice, DiscountAmount, " +
                     "TaxAmount, LineTotal, SerialNumber) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -144,11 +144,11 @@ public class TransactionDAO extends BaseDAO<Transaction> {
             }
             stmtItem.executeBatch();
 
-            String paySql = "INSERT INTO [dbo].[tbl_Payment] " +
+            String paySql = "INSERT INTO tbl_Payment " +
                     "(TransactionID, PaymentMethod, Amount, ReferenceNumber, CardType, " +
                     "CardLastFour, AuthorizationCode, CheckNumber, GiftCardNumber, " +
                     "Status, ProcessedDate) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
             stmtPay = conn.prepareStatement(paySql);
             for (Payment payment : payments) {
@@ -167,8 +167,8 @@ public class TransactionDAO extends BaseDAO<Transaction> {
             }
             stmtPay.executeBatch();
 
-            String updateInv = "UPDATE [dbo].[tbl_Inventory] SET QuantityOnHand = QuantityOnHand - ?, " +
-                    "ModifiedDate = GETDATE() WHERE ProductID = ? AND StoreID = ?";
+            String updateInv = "UPDATE tbl_Inventory SET QuantityOnHand = QuantityOnHand - ?, " +
+                    "ModifiedDate = CURRENT_TIMESTAMP WHERE ProductID = ? AND StoreID = ?";
             PreparedStatement stmtInv = conn.prepareStatement(updateInv);
             for (TransactionItem item : items) {
                 setParameter(stmtInv, 1, item.getQuantity());
@@ -193,43 +193,43 @@ public class TransactionDAO extends BaseDAO<Transaction> {
     }
 
     public int voidTransaction(int transactionId, int voidEmployeeId, String reason) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Transaction] SET Status = 3, VoidReason = ?, " +
-                "VoidEmployeeID = ?, ModifiedDate = GETDATE() WHERE TransactionID = ?";
+        String sql = "UPDATE tbl_Transaction SET Status = 3, VoidReason = ?, " +
+                "VoidEmployeeID = ?, ModifiedDate = CURRENT_TIMESTAMP WHERE TransactionID = ?";
         return executeUpdate(sql, reason, voidEmployeeId, transactionId);
     }
 
     public BigDecimal getDailySales(int storeId, Date date) throws SQLException {
-        String sql = "SELECT ISNULL(SUM(GrandTotal), 0) FROM [dbo].[tbl_Transaction] " +
+        String sql = "SELECT COALESCE(SUM(GrandTotal), 0) FROM tbl_Transaction " +
                 "WHERE StoreID = ? AND CAST(TransactionDate AS DATE) = CAST(? AS DATE) AND Status = 1";
         return executeScalar(sql, BigDecimal.class, storeId, date);
     }
 
     public int getDailyTransactionCount(int storeId, Date date) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM [dbo].[tbl_Transaction] " +
+        String sql = "SELECT COUNT(*) FROM tbl_Transaction " +
                 "WHERE StoreID = ? AND CAST(TransactionDate AS DATE) = CAST(? AS DATE) AND Status = 1";
         return executeScalar(sql, Integer.class, storeId, date);
     }
 
     public BigDecimal getAverageTransactionValue(int storeId, Date startDate, Date endDate) throws SQLException {
-        String sql = "SELECT AVG(GrandTotal) FROM [dbo].[tbl_Transaction] " +
+        String sql = "SELECT AVG(GrandTotal) FROM tbl_Transaction " +
                 "WHERE StoreID = ? AND TransactionDate BETWEEN ? AND ? AND Status = 1";
         return executeScalar(sql, BigDecimal.class, storeId, startDate, endDate);
     }
 
     public List<Map<String, Object>> getSalesByHour(int storeId, Date date) throws SQLException {
-        String sql = "SELECT DATEPART(HOUR, TransactionDate) AS SaleHour, " +
+        String sql = "SELECT EXTRACT(HOUR FROM TransactionDate) AS SaleHour, " +
                 "COUNT(*) AS TransactionCount, SUM(GrandTotal) AS TotalSales " +
-                "FROM [dbo].[tbl_Transaction] " +
-                "WHERE StoreID = ? AND CAST(TransactionDate AS DATE) = CAST(? AS DATE) AND Status = 1 " +
-                "GROUP BY DATEPART(HOUR, TransactionDate) ORDER BY SaleHour";
+                "FROM tbl_Transaction " +
+                "WHERE StoreID = ? AND DATE(TransactionDate) = DATE(?) AND Status = 1 " +
+                "GROUP BY EXTRACT(HOUR FROM TransactionDate) ORDER BY SaleHour";
         return executeQuery(sql, storeId, date);
     }
 
     public List<Map<String, Object>> getSalesByEmployee(int storeId, Date startDate, Date endDate) throws SQLException {
-        String sql = "SELECT e.EmployeeID, e.FirstName + ' ' + e.LastName AS EmployeeName, " +
+        String sql = "SELECT e.EmployeeID, e.FirstName || ' ' || e.LastName AS EmployeeName, " +
                 "COUNT(t.TransactionID) AS TransactionCount, SUM(t.GrandTotal) AS TotalSales " +
-                "FROM [dbo].[tbl_Transaction] t " +
-                "INNER JOIN [dbo].[tbl_Employee] e ON t.EmployeeID = e.EmployeeID " +
+                "FROM tbl_Transaction t " +
+                "INNER JOIN tbl_Employee e ON t.EmployeeID = e.EmployeeID " +
                 "WHERE t.StoreID = ? AND t.TransactionDate BETWEEN ? AND ? AND t.Status = 1 " +
                 "GROUP BY e.EmployeeID, e.FirstName, e.LastName " +
                 "ORDER BY TotalSales DESC";
@@ -237,12 +237,12 @@ public class TransactionDAO extends BaseDAO<Transaction> {
     }
 
     public String generateTransactionNumber(int storeId, int registerNumber) throws SQLException {
-        String sql = "SELECT RIGHT('000' + CAST(? AS VARCHAR), 3) + '-' + " +
-                "RIGHT('00' + CAST(? AS VARCHAR), 2) + '-' + " +
-                "FORMAT(GETDATE(), 'yyyyMMdd') + '-' + " +
-                "RIGHT('0000' + CAST(ISNULL(MAX(CAST(RIGHT(TransactionNumber, 4) AS INT)), 0) + 1 AS VARCHAR), 4) " +
-                "FROM [dbo].[tbl_Transaction] " +
-                "WHERE StoreID = ? AND CAST(TransactionDate AS DATE) = CAST(GETDATE() AS DATE)";
+        String sql = "SELECT RIGHT('000' || CAST(? AS VARCHAR), 3) || '-' || " +
+                "RIGHT('00' || CAST(? AS VARCHAR), 2) || '-' || " +
+                "TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD') || '-' || " +
+                "RIGHT('0000' || CAST(COALESCE(MAX(CAST(RIGHT(TransactionNumber, 4) AS INT)), 0) + 1 AS VARCHAR), 4) " +
+                "FROM tbl_Transaction " +
+                "WHERE StoreID = ? AND DATE(TransactionDate) = DATE(CURRENT_TIMESTAMP)";
         return executeScalar(sql, String.class, storeId, registerNumber, storeId);
     }
 }

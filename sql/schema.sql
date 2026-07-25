@@ -1,471 +1,461 @@
-USE master;
-GO
+-- PostgreSQL-compatible schema for the retail legacy application.
+-- The application uses mixed-case identifiers, so the database objects are created
+-- with lowercase names to match PostgreSQL's unquoted-identifier folding.
 
-IF EXISTS (SELECT name FROM sys.databases WHERE name = N'retail')
-    DROP DATABASE retail;
-GO
-
-CREATE DATABASE retail;
-GO
-
-USE retail;
-GO
-
-CREATE TABLE tbl_Region (
-    RegionID INT IDENTITY(1,1) PRIMARY KEY,
-    RegionName VARCHAR(100) NOT NULL,
-    RegionCode VARCHAR(10) NOT NULL UNIQUE,
-    CountryCode VARCHAR(5) NOT NULL DEFAULT 'US',
-    TaxRate DECIMAL(5,4) NOT NULL DEFAULT 0.0000,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_region (
+    regionid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    regionname varchar(100) NOT NULL,
+    regioncode varchar(10) NOT NULL UNIQUE,
+    countrycode varchar(5) NOT NULL DEFAULT 'US',
+    taxrate numeric(5,4) NOT NULL DEFAULT 0.0000,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Store (
-    StoreID INT IDENTITY(1,1) PRIMARY KEY,
-    StoreName VARCHAR(200) NOT NULL,
-    StoreCode VARCHAR(20) NOT NULL UNIQUE,
-    RegionID INT NOT NULL FOREIGN KEY REFERENCES tbl_Region(RegionID),
-    Address1 VARCHAR(255) NOT NULL,
-    Address2 VARCHAR(255) NULL,
-    City VARCHAR(100) NOT NULL,
-    StateProvince VARCHAR(50) NOT NULL,
-    PostalCode VARCHAR(20) NOT NULL,
-    Phone VARCHAR(30) NULL,
-    Fax VARCHAR(30) NULL,
-    Email VARCHAR(150) NULL,
-    ManagerEmployeeID INT NULL,
-    OpenDate DATE NOT NULL,
-    CloseDate DATE NULL,
-    SquareFootage INT NULL,
-    StoreType TINYINT NOT NULL DEFAULT 1,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_store (
+    storeid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    storename varchar(200) NOT NULL,
+    storecode varchar(20) NOT NULL UNIQUE,
+    regionid integer NOT NULL REFERENCES tbl_region(regionid),
+    address1 varchar(255) NOT NULL,
+    address2 varchar(255) NULL,
+    city varchar(100) NOT NULL,
+    stateprovince varchar(50) NOT NULL,
+    postalcode varchar(20) NOT NULL,
+    phone varchar(30) NULL,
+    fax varchar(30) NULL,
+    email varchar(150) NULL,
+    manageremployeeid integer NULL,
+    opendate date NOT NULL,
+    closedate date NULL,
+    squarefootage integer NULL,
+    storetype smallint NOT NULL DEFAULT 1,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Department (
-    DepartmentID INT IDENTITY(1,1) PRIMARY KEY,
-    DepartmentName VARCHAR(100) NOT NULL,
-    DepartmentCode VARCHAR(10) NOT NULL UNIQUE,
-    ParentDepartmentID INT NULL FOREIGN KEY REFERENCES tbl_Department(DepartmentID),
-    SortOrder INT NOT NULL DEFAULT 0,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_department (
+    departmentid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    departmentname varchar(100) NOT NULL,
+    departmentcode varchar(10) NOT NULL UNIQUE,
+    parentdepartmentid integer NULL REFERENCES tbl_department(departmentid),
+    sortorder integer NOT NULL DEFAULT 0,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Category (
-    CategoryID INT IDENTITY(1,1) PRIMARY KEY,
-    CategoryName VARCHAR(150) NOT NULL,
-    CategoryCode VARCHAR(20) NOT NULL UNIQUE,
-    DepartmentID INT NOT NULL FOREIGN KEY REFERENCES tbl_Department(DepartmentID),
-    ParentCategoryID INT NULL FOREIGN KEY REFERENCES tbl_Category(CategoryID),
-    Description VARCHAR(500) NULL,
-    ImagePath VARCHAR(500) NULL,
-    SortOrder INT NOT NULL DEFAULT 0,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_category (
+    categoryid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    categoryname varchar(150) NOT NULL,
+    categorycode varchar(20) NOT NULL UNIQUE,
+    departmentid integer NOT NULL REFERENCES tbl_department(departmentid),
+    parentcategoryid integer NULL REFERENCES tbl_category(categoryid),
+    description varchar(500) NULL,
+    imagepath varchar(500) NULL,
+    sortorder integer NOT NULL DEFAULT 0,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Vendor (
-    VendorID INT IDENTITY(1,1) PRIMARY KEY,
-    VendorName VARCHAR(200) NOT NULL,
-    VendorCode VARCHAR(20) NOT NULL UNIQUE,
-    ContactName VARCHAR(150) NULL,
-    ContactEmail VARCHAR(150) NULL,
-    ContactPhone VARCHAR(30) NULL,
-    Address1 VARCHAR(255) NULL,
-    Address2 VARCHAR(255) NULL,
-    City VARCHAR(100) NULL,
-    StateProvince VARCHAR(50) NULL,
-    PostalCode VARCHAR(20) NULL,
-    CountryCode VARCHAR(5) NOT NULL DEFAULT 'US',
-    PaymentTerms VARCHAR(50) NULL,
-    LeadTimeDays INT NULL DEFAULT 14,
-    MinOrderAmount DECIMAL(12,2) NULL,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_vendor (
+    vendorid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    vendorname varchar(200) NOT NULL,
+    vendorcode varchar(20) NOT NULL UNIQUE,
+    contactname varchar(150) NULL,
+    contactemail varchar(150) NULL,
+    contactphone varchar(30) NULL,
+    address1 varchar(255) NULL,
+    address2 varchar(255) NULL,
+    city varchar(100) NULL,
+    stateprovince varchar(50) NULL,
+    postalcode varchar(20) NULL,
+    countrycode varchar(5) NOT NULL DEFAULT 'US',
+    paymentterms varchar(50) NULL,
+    leadtimedays integer NULL DEFAULT 14,
+    minorderamount numeric(12,2) NULL,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Product (
-    ProductID INT IDENTITY(1,1) PRIMARY KEY,
-    SKU VARCHAR(50) NOT NULL UNIQUE,
-    UPC VARCHAR(20) NULL,
-    ProductName VARCHAR(300) NOT NULL,
-    ShortDescription VARCHAR(500) NULL,
-    LongDescription TEXT NULL,
-    CategoryID INT NOT NULL FOREIGN KEY REFERENCES tbl_Category(CategoryID),
-    VendorID INT NULL FOREIGN KEY REFERENCES tbl_Vendor(VendorID),
-    Brand VARCHAR(100) NULL,
-    ModelNumber VARCHAR(100) NULL,
-    UnitCost DECIMAL(12,4) NOT NULL DEFAULT 0.0000,
-    RetailPrice DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    SalePrice DECIMAL(12,2) NULL,
-    SaleStartDate DATETIME NULL,
-    SaleEndDate DATETIME NULL,
-    Weight DECIMAL(10,4) NULL,
-    WeightUnit VARCHAR(10) NULL DEFAULT 'lb',
-    Length DECIMAL(10,2) NULL,
-    Width DECIMAL(10,2) NULL,
-    Height DECIMAL(10,2) NULL,
-    DimensionUnit VARCHAR(10) NULL DEFAULT 'in',
-    Color VARCHAR(50) NULL,
-    Size VARCHAR(50) NULL,
-    Material VARCHAR(100) NULL,
-    IsTaxable BIT NOT NULL DEFAULT 1,
-    IsDiscountable BIT NOT NULL DEFAULT 1,
-    IsReturnable BIT NOT NULL DEFAULT 1,
-    ReturnWindowDays INT NOT NULL DEFAULT 30,
-    MinStockLevel INT NOT NULL DEFAULT 5,
-    MaxStockLevel INT NOT NULL DEFAULT 500,
-    ReorderPoint INT NOT NULL DEFAULT 10,
-    ReorderQuantity INT NOT NULL DEFAULT 50,
-    Status TINYINT NOT NULL DEFAULT 1,
-    ImagePath VARCHAR(500) NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_product (
+    productid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sku varchar(50) NOT NULL UNIQUE,
+    upc varchar(20) NULL,
+    productname varchar(300) NOT NULL,
+    shortdescription varchar(500) NULL,
+    longdescription text NULL,
+    categoryid integer NOT NULL REFERENCES tbl_category(categoryid),
+    vendorid integer NULL REFERENCES tbl_vendor(vendorid),
+    brand varchar(100) NULL,
+    modelnumber varchar(100) NULL,
+    unitcost numeric(12,4) NOT NULL DEFAULT 0.0000,
+    retailprice numeric(12,2) NOT NULL DEFAULT 0.00,
+    saleprice numeric(12,2) NULL,
+    salestartdate timestamp NULL,
+    saleenddate timestamp NULL,
+    weight numeric(10,4) NULL,
+    weightunit varchar(10) NULL DEFAULT 'lb',
+    length numeric(10,2) NULL,
+    width numeric(10,2) NULL,
+    height numeric(10,2) NULL,
+    dimensionunit varchar(10) NULL DEFAULT 'in',
+    color varchar(50) NULL,
+    size varchar(50) NULL,
+    material varchar(100) NULL,
+    istaxable boolean NOT NULL DEFAULT TRUE,
+    isdiscountable boolean NOT NULL DEFAULT TRUE,
+    isreturnable boolean NOT NULL DEFAULT TRUE,
+    returnwindowdays integer NOT NULL DEFAULT 30,
+    minstocklevel integer NOT NULL DEFAULT 5,
+    maxstocklevel integer NOT NULL DEFAULT 500,
+    reorderpoint integer NOT NULL DEFAULT 10,
+    reorderquantity integer NOT NULL DEFAULT 50,
+    status smallint NOT NULL DEFAULT 1,
+    imagepath varchar(500) NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Inventory (
-    InventoryID INT IDENTITY(1,1) PRIMARY KEY,
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    StoreID INT NOT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    QuantityOnHand INT NOT NULL DEFAULT 0,
-    QuantityReserved INT NOT NULL DEFAULT 0,
-    QuantityOnOrder INT NOT NULL DEFAULT 0,
-    BinLocation VARCHAR(50) NULL,
-    AisleName VARCHAR(50) NULL,
-    ShelfNumber VARCHAR(20) NULL,
-    LastCountDate DATETIME NULL,
-    LastReceivedDate DATETIME NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL,
-    CONSTRAINT UQ_Inventory_Product_Store UNIQUE (ProductID, StoreID)
+CREATE TABLE tbl_inventory (
+    inventoryid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    storeid integer NOT NULL REFERENCES tbl_store(storeid),
+    quantityonhand integer NOT NULL DEFAULT 0,
+    quantityreserved integer NOT NULL DEFAULT 0,
+    quantityonorder integer NOT NULL DEFAULT 0,
+    binlocation varchar(50) NULL,
+    aislename varchar(50) NULL,
+    shelfnumber varchar(20) NULL,
+    lastcountdate timestamp NULL,
+    lastreceiveddate timestamp NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL,
+    CONSTRAINT uq_inventory_product_store UNIQUE (productid, storeid)
 );
 
-CREATE TABLE tbl_Employee (
-    EmployeeID INT IDENTITY(1,1) PRIMARY KEY,
-    EmployeeNumber VARCHAR(20) NOT NULL UNIQUE,
-    FirstName VARCHAR(100) NOT NULL,
-    LastName VARCHAR(100) NOT NULL,
-    MiddleName VARCHAR(100) NULL,
-    Email VARCHAR(150) NULL,
-    Phone VARCHAR(30) NULL,
-    StoreID INT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    DepartmentID INT NULL FOREIGN KEY REFERENCES tbl_Department(DepartmentID),
-    JobTitle VARCHAR(100) NULL,
-    HireDate DATE NOT NULL,
-    TerminationDate DATE NULL,
-    HourlyRate DECIMAL(8,2) NULL,
-    SalaryAmount DECIMAL(12,2) NULL,
-    CommissionRate DECIMAL(5,4) NULL DEFAULT 0.0000,
-    ManagerEmployeeID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    AccessLevel TINYINT NOT NULL DEFAULT 1,
-    PinCode VARCHAR(10) NULL,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_employee (
+    employeeid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employeenumber varchar(20) NOT NULL UNIQUE,
+    firstname varchar(100) NOT NULL,
+    lastname varchar(100) NOT NULL,
+    middlename varchar(100) NULL,
+    email varchar(150) NULL,
+    phone varchar(30) NULL,
+    storeid integer NULL REFERENCES tbl_store(storeid),
+    departmentid integer NULL REFERENCES tbl_department(departmentid),
+    jobtitle varchar(100) NULL,
+    hiredate date NOT NULL,
+    terminationdate date NULL,
+    hourlyrate numeric(8,2) NULL,
+    salaryamount numeric(12,2) NULL,
+    commissionrate numeric(5,4) NULL DEFAULT 0.0000,
+    manageremployeeid integer NULL REFERENCES tbl_employee(employeeid),
+    accesslevel smallint NOT NULL DEFAULT 1,
+    pincode varchar(10) NULL,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-ALTER TABLE tbl_Store ADD CONSTRAINT FK_Store_Manager FOREIGN KEY (ManagerEmployeeID) REFERENCES tbl_Employee(EmployeeID);
+ALTER TABLE tbl_store ADD CONSTRAINT fk_store_manager FOREIGN KEY (manageremployeeid) REFERENCES tbl_employee(employeeid);
 
-CREATE TABLE tbl_Customer (
-    CustomerID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerNumber VARCHAR(20) NOT NULL UNIQUE,
-    FirstName VARCHAR(100) NOT NULL,
-    LastName VARCHAR(100) NOT NULL,
-    MiddleName VARCHAR(100) NULL,
-    Email VARCHAR(150) NULL,
-    Phone VARCHAR(30) NULL,
-    MobilePhone VARCHAR(30) NULL,
-    Address1 VARCHAR(255) NULL,
-    Address2 VARCHAR(255) NULL,
-    City VARCHAR(100) NULL,
-    StateProvince VARCHAR(50) NULL,
-    PostalCode VARCHAR(20) NULL,
-    CountryCode VARCHAR(5) NOT NULL DEFAULT 'US',
-    DateOfBirth DATE NULL,
-    Gender CHAR(1) NULL,
-    LoyaltyPoints INT NOT NULL DEFAULT 0,
-    LoyaltyTier TINYINT NOT NULL DEFAULT 0,
-    TotalSpend DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    VisitCount INT NOT NULL DEFAULT 0,
-    LastVisitDate DATETIME NULL,
-    PreferredStoreID INT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    TaxExempt BIT NOT NULL DEFAULT 0,
-    TaxExemptNumber VARCHAR(50) NULL,
-    Notes TEXT NULL,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_customer (
+    customerid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customernumber varchar(20) NOT NULL UNIQUE,
+    firstname varchar(100) NOT NULL,
+    lastname varchar(100) NOT NULL,
+    middlename varchar(100) NULL,
+    email varchar(150) NULL,
+    phone varchar(30) NULL,
+    mobilephone varchar(30) NULL,
+    address1 varchar(255) NULL,
+    address2 varchar(255) NULL,
+    city varchar(100) NULL,
+    stateprovince varchar(50) NULL,
+    postalcode varchar(20) NULL,
+    countrycode varchar(5) NOT NULL DEFAULT 'US',
+    dateofbirth date NULL,
+    gender char(1) NULL,
+    loyaltypoints integer NOT NULL DEFAULT 0,
+    loyaltytier smallint NOT NULL DEFAULT 0,
+    totalspend numeric(14,2) NOT NULL DEFAULT 0.00,
+    visitcount integer NOT NULL DEFAULT 0,
+    lastvisitdate timestamp NULL,
+    preferredstoreid integer NULL REFERENCES tbl_store(storeid),
+    taxexempt boolean NOT NULL DEFAULT FALSE,
+    taxexemptnumber varchar(50) NULL,
+    notes text NULL,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Promotion (
-    PromotionID INT IDENTITY(1,1) PRIMARY KEY,
-    PromotionName VARCHAR(200) NOT NULL,
-    PromotionCode VARCHAR(30) NOT NULL UNIQUE,
-    Description VARCHAR(500) NULL,
-    DiscountType TINYINT NOT NULL DEFAULT 1,
-    DiscountValue DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    MinPurchaseAmount DECIMAL(12,2) NULL,
-    MaxDiscountAmount DECIMAL(12,2) NULL,
-    StartDate DATETIME NOT NULL,
-    EndDate DATETIME NOT NULL,
-    UsageLimit INT NULL,
-    UsageCount INT NOT NULL DEFAULT 0,
-    PerCustomerLimit INT NULL,
-    ApplicableCategoryID INT NULL FOREIGN KEY REFERENCES tbl_Category(CategoryID),
-    ApplicableProductID INT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    ApplicableStoreID INT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    RequiresLoyaltyTier TINYINT NULL,
-    IsStackable BIT NOT NULL DEFAULT 0,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_promotion (
+    promotionid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    promotionname varchar(200) NOT NULL,
+    promotioncode varchar(30) NOT NULL UNIQUE,
+    description varchar(500) NULL,
+    discounttype smallint NOT NULL DEFAULT 1,
+    discountvalue numeric(10,2) NOT NULL DEFAULT 0.00,
+    minpurchaseamount numeric(12,2) NULL,
+    maxdiscountamount numeric(12,2) NULL,
+    startdate timestamp NOT NULL,
+    enddate timestamp NOT NULL,
+    usagelimit integer NULL,
+    usagecount integer NOT NULL DEFAULT 0,
+    percustomerlimit integer NULL,
+    applicablecategoryid integer NULL REFERENCES tbl_category(categoryid),
+    applicableproductid integer NULL REFERENCES tbl_product(productid),
+    applicablestoreid integer NULL REFERENCES tbl_store(storeid),
+    requiresloyaltytier smallint NULL,
+    isstackable boolean NOT NULL DEFAULT FALSE,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Transaction (
-    TransactionID INT IDENTITY(1,1) PRIMARY KEY,
-    TransactionNumber VARCHAR(30) NOT NULL UNIQUE,
-    StoreID INT NOT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    RegisterNumber INT NOT NULL DEFAULT 1,
-    EmployeeID INT NOT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    CustomerID INT NULL FOREIGN KEY REFERENCES tbl_Customer(CustomerID),
-    TransactionDate DATETIME NOT NULL DEFAULT GETDATE(),
-    TransactionType TINYINT NOT NULL DEFAULT 1,
-    SubTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    DiscountTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    TaxTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    GrandTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    TenderAmount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    ChangeAmount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    PromotionID INT NULL FOREIGN KEY REFERENCES tbl_Promotion(PromotionID),
-    LoyaltyPointsEarned INT NOT NULL DEFAULT 0,
-    LoyaltyPointsRedeemed INT NOT NULL DEFAULT 0,
-    Status TINYINT NOT NULL DEFAULT 1,
-    VoidReason VARCHAR(255) NULL,
-    VoidEmployeeID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    Notes VARCHAR(500) NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_transaction (
+    transactionid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    transactionnumber varchar(30) NOT NULL UNIQUE,
+    storeid integer NOT NULL REFERENCES tbl_store(storeid),
+    registernumber integer NOT NULL DEFAULT 1,
+    employeeid integer NOT NULL REFERENCES tbl_employee(employeeid),
+    customerid integer NULL REFERENCES tbl_customer(customerid),
+    transactiondate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    transactiontype smallint NOT NULL DEFAULT 1,
+    subtotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    discounttotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    taxtotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    grandtotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    tenderamount numeric(14,2) NOT NULL DEFAULT 0.00,
+    changeamount numeric(14,2) NOT NULL DEFAULT 0.00,
+    promotionid integer NULL REFERENCES tbl_promotion(promotionid),
+    loyaltypointsearned integer NOT NULL DEFAULT 0,
+    loyaltypointsredeemed integer NOT NULL DEFAULT 0,
+    status smallint NOT NULL DEFAULT 1,
+    voidreason varchar(255) NULL,
+    voidemployeeid integer NULL REFERENCES tbl_employee(employeeid),
+    notes varchar(500) NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_TransactionItem (
-    TransactionItemID INT IDENTITY(1,1) PRIMARY KEY,
-    TransactionID INT NOT NULL FOREIGN KEY REFERENCES tbl_Transaction(TransactionID),
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    Quantity INT NOT NULL DEFAULT 1,
-    UnitPrice DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    DiscountAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    TaxAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    LineTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    ReturnQuantity INT NOT NULL DEFAULT 0,
-    SerialNumber VARCHAR(100) NULL,
-    IsVoided BIT NOT NULL DEFAULT 0,
-    VoidReason VARCHAR(255) NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_transactionitem (
+    transactionitemid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    transactionid integer NOT NULL REFERENCES tbl_transaction(transactionid),
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    quantity integer NOT NULL DEFAULT 1,
+    unitprice numeric(12,2) NOT NULL DEFAULT 0.00,
+    discountamount numeric(12,2) NOT NULL DEFAULT 0.00,
+    taxamount numeric(12,2) NOT NULL DEFAULT 0.00,
+    linetotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    returnquantity integer NOT NULL DEFAULT 0,
+    serialnumber varchar(100) NULL,
+    isvoided boolean NOT NULL DEFAULT FALSE,
+    voidreason varchar(255) NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Payment (
-    PaymentID INT IDENTITY(1,1) PRIMARY KEY,
-    TransactionID INT NOT NULL FOREIGN KEY REFERENCES tbl_Transaction(TransactionID),
-    PaymentMethod TINYINT NOT NULL DEFAULT 1,
-    Amount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    ReferenceNumber VARCHAR(100) NULL,
-    CardType VARCHAR(30) NULL,
-    CardLastFour VARCHAR(4) NULL,
-    AuthorizationCode VARCHAR(50) NULL,
-    CheckNumber VARCHAR(20) NULL,
-    GiftCardNumber VARCHAR(30) NULL,
-    Status TINYINT NOT NULL DEFAULT 1,
-    ProcessedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_payment (
+    paymentid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    transactionid integer NOT NULL REFERENCES tbl_transaction(transactionid),
+    paymentmethod smallint NOT NULL DEFAULT 1,
+    amount numeric(14,2) NOT NULL DEFAULT 0.00,
+    referencenumber varchar(100) NULL,
+    cardtype varchar(30) NULL,
+    cardlastfour varchar(4) NULL,
+    authorizationcode varchar(50) NULL,
+    checknumber varchar(20) NULL,
+    giftcardnumber varchar(30) NULL,
+    status smallint NOT NULL DEFAULT 1,
+    processeddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_Return (
-    ReturnID INT IDENTITY(1,1) PRIMARY KEY,
-    ReturnNumber VARCHAR(30) NOT NULL UNIQUE,
-    OriginalTransactionID INT NOT NULL FOREIGN KEY REFERENCES tbl_Transaction(TransactionID),
-    StoreID INT NOT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    EmployeeID INT NOT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    CustomerID INT NULL FOREIGN KEY REFERENCES tbl_Customer(CustomerID),
-    ReturnDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ReturnReason TINYINT NOT NULL DEFAULT 1,
-    ReasonDescription VARCHAR(500) NULL,
-    RefundAmount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    RefundMethod TINYINT NOT NULL DEFAULT 1,
-    Status TINYINT NOT NULL DEFAULT 1,
-    ManagerApprovalID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_return (
+    returnid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    returnnumber varchar(30) NOT NULL UNIQUE,
+    originaltransactionid integer NOT NULL REFERENCES tbl_transaction(transactionid),
+    storeid integer NOT NULL REFERENCES tbl_store(storeid),
+    employeeid integer NOT NULL REFERENCES tbl_employee(employeeid),
+    customerid integer NULL REFERENCES tbl_customer(customerid),
+    returndate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    returnreason smallint NOT NULL DEFAULT 1,
+    reasondescription varchar(500) NULL,
+    refundamount numeric(14,2) NOT NULL DEFAULT 0.00,
+    refundmethod smallint NOT NULL DEFAULT 1,
+    status smallint NOT NULL DEFAULT 1,
+    managerapprovalid integer NULL REFERENCES tbl_employee(employeeid),
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_ReturnItem (
-    ReturnItemID INT IDENTITY(1,1) PRIMARY KEY,
-    ReturnID INT NOT NULL FOREIGN KEY REFERENCES tbl_Return(ReturnID),
-    TransactionItemID INT NOT NULL FOREIGN KEY REFERENCES tbl_TransactionItem(TransactionItemID),
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    Quantity INT NOT NULL DEFAULT 1,
-    RefundAmount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    Condition TINYINT NOT NULL DEFAULT 1,
-    RestockFlag BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_returnitem (
+    returnitemid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    returnid integer NOT NULL REFERENCES tbl_return(returnid),
+    transactionitemid integer NOT NULL REFERENCES tbl_transactionitem(transactionitemid),
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    quantity integer NOT NULL DEFAULT 1,
+    refundamount numeric(12,2) NOT NULL DEFAULT 0.00,
+    condition smallint NOT NULL DEFAULT 1,
+    restockflag boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_PurchaseOrder (
-    PurchaseOrderID INT IDENTITY(1,1) PRIMARY KEY,
-    PONumber VARCHAR(30) NOT NULL UNIQUE,
-    VendorID INT NOT NULL FOREIGN KEY REFERENCES tbl_Vendor(VendorID),
-    StoreID INT NOT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    OrderedByEmployeeID INT NOT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    ApprovedByEmployeeID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    OrderDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ExpectedDeliveryDate DATE NULL,
-    ActualDeliveryDate DATE NULL,
-    SubTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    ShippingCost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    TaxAmount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    TotalAmount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    Status TINYINT NOT NULL DEFAULT 1,
-    Notes TEXT NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_purchaseorder (
+    purchaseorderid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ponumber varchar(30) NOT NULL UNIQUE,
+    vendorid integer NOT NULL REFERENCES tbl_vendor(vendorid),
+    storeid integer NOT NULL REFERENCES tbl_store(storeid),
+    orderedbyemployeeid integer NOT NULL REFERENCES tbl_employee(employeeid),
+    approvedbyemployeeid integer NULL REFERENCES tbl_employee(employeeid),
+    orderdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expecteddeliverydate date NULL,
+    actualdeliverydate date NULL,
+    subtotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    shippingcost numeric(10,2) NOT NULL DEFAULT 0.00,
+    taxamount numeric(10,2) NOT NULL DEFAULT 0.00,
+    totalamount numeric(14,2) NOT NULL DEFAULT 0.00,
+    status smallint NOT NULL DEFAULT 1,
+    notes text NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_PurchaseOrderItem (
-    PurchaseOrderItemID INT IDENTITY(1,1) PRIMARY KEY,
-    PurchaseOrderID INT NOT NULL FOREIGN KEY REFERENCES tbl_PurchaseOrder(PurchaseOrderID),
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    QuantityOrdered INT NOT NULL DEFAULT 0,
-    QuantityReceived INT NOT NULL DEFAULT 0,
-    UnitCost DECIMAL(12,4) NOT NULL DEFAULT 0.0000,
-    LineTotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-    Status TINYINT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_purchaseorderitem (
+    purchaseorderitemid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    purchaseorderid integer NOT NULL REFERENCES tbl_purchaseorder(purchaseorderid),
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    quantityordered integer NOT NULL DEFAULT 0,
+    quantityreceived integer NOT NULL DEFAULT 0,
+    unitcost numeric(12,4) NOT NULL DEFAULT 0.0000,
+    linetotal numeric(14,2) NOT NULL DEFAULT 0.00,
+    status smallint NOT NULL DEFAULT 1,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_PriceHistory (
-    PriceHistoryID INT IDENTITY(1,1) PRIMARY KEY,
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    OldRetailPrice DECIMAL(12,2) NOT NULL,
-    NewRetailPrice DECIMAL(12,2) NOT NULL,
-    OldCost DECIMAL(12,4) NULL,
-    NewCost DECIMAL(12,4) NULL,
-    ChangedByEmployeeID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    ChangeReason VARCHAR(255) NULL,
-    EffectiveDate DATETIME NOT NULL DEFAULT GETDATE(),
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()
+CREATE TABLE tbl_pricehistory (
+    pricehistoryid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    oldretailprice numeric(12,2) NOT NULL,
+    newretailprice numeric(12,2) NOT NULL,
+    oldcost numeric(12,4) NULL,
+    newcost numeric(12,4) NULL,
+    changedbyemployeeid integer NULL REFERENCES tbl_employee(employeeid),
+    changereason varchar(255) NULL,
+    effectivedate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE tbl_InventoryAdjustment (
-    AdjustmentID INT IDENTITY(1,1) PRIMARY KEY,
-    AdjustmentNumber VARCHAR(30) NOT NULL UNIQUE,
-    StoreID INT NOT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    EmployeeID INT NOT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    AdjustmentDate DATETIME NOT NULL DEFAULT GETDATE(),
-    AdjustmentType TINYINT NOT NULL DEFAULT 1,
-    Reason VARCHAR(500) NULL,
-    ApprovedByEmployeeID INT NULL FOREIGN KEY REFERENCES tbl_Employee(EmployeeID),
-    Status TINYINT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_inventoryadjustment (
+    adjustmentid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    adjustmentnumber varchar(30) NOT NULL UNIQUE,
+    storeid integer NOT NULL REFERENCES tbl_store(storeid),
+    employeeid integer NOT NULL REFERENCES tbl_employee(employeeid),
+    adjustmentdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    adjustmenttype smallint NOT NULL DEFAULT 1,
+    reason varchar(500) NULL,
+    approvedbyemployeeid integer NULL REFERENCES tbl_employee(employeeid),
+    status smallint NOT NULL DEFAULT 1,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_InventoryAdjustmentItem (
-    AdjustmentItemID INT IDENTITY(1,1) PRIMARY KEY,
-    AdjustmentID INT NOT NULL FOREIGN KEY REFERENCES tbl_InventoryAdjustment(AdjustmentID),
-    ProductID INT NOT NULL FOREIGN KEY REFERENCES tbl_Product(ProductID),
-    QuantityBefore INT NOT NULL DEFAULT 0,
-    QuantityAfter INT NOT NULL DEFAULT 0,
-    QuantityDifference INT NOT NULL DEFAULT 0,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()
+CREATE TABLE tbl_inventoryadjustmentitem (
+    adjustmentitemid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    adjustmentid integer NOT NULL REFERENCES tbl_inventoryadjustment(adjustmentid),
+    productid integer NOT NULL REFERENCES tbl_product(productid),
+    quantitybefore integer NOT NULL DEFAULT 0,
+    quantityafter integer NOT NULL DEFAULT 0,
+    quantitydifference integer NOT NULL DEFAULT 0,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE tbl_GiftCard (
-    GiftCardID INT IDENTITY(1,1) PRIMARY KEY,
-    CardNumber VARCHAR(30) NOT NULL UNIQUE,
-    PIN VARCHAR(10) NULL,
-    OriginalBalance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    CurrentBalance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    PurchasedAtStoreID INT NULL FOREIGN KEY REFERENCES tbl_Store(StoreID),
-    PurchasedByCustomerID INT NULL FOREIGN KEY REFERENCES tbl_Customer(CustomerID),
-    PurchaseDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ExpirationDate DATE NULL,
-    Status TINYINT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_giftcard (
+    giftcardid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    cardnumber varchar(30) NOT NULL UNIQUE,
+    pin varchar(10) NULL,
+    originalbalance numeric(10,2) NOT NULL DEFAULT 0.00,
+    currentbalance numeric(10,2) NOT NULL DEFAULT 0.00,
+    purchasedatstoreid integer NULL REFERENCES tbl_store(storeid),
+    purchasedbycustomerid integer NULL REFERENCES tbl_customer(customerid),
+    purchasedate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expirationdate date NULL,
+    status smallint NOT NULL DEFAULT 1,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_AuditLog (
-    AuditLogID BIGINT IDENTITY(1,1) PRIMARY KEY,
-    TableName VARCHAR(100) NOT NULL,
-    RecordID INT NOT NULL,
-    Action VARCHAR(10) NOT NULL,
-    OldValues TEXT NULL,
-    NewValues TEXT NULL,
-    EmployeeID INT NULL,
-    IPAddress VARCHAR(45) NULL,
-    Workstation VARCHAR(100) NULL,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()
+CREATE TABLE tbl_auditlog (
+    auditlogid bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tablename varchar(100) NOT NULL,
+    recordid integer NOT NULL,
+    action varchar(10) NOT NULL,
+    oldvalues text NULL,
+    newvalues text NULL,
+    employeeid integer NULL,
+    ipaddress varchar(45) NULL,
+    workstation varchar(100) NULL,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE tbl_SystemConfig (
-    ConfigID INT IDENTITY(1,1) PRIMARY KEY,
-    ConfigKey VARCHAR(100) NOT NULL UNIQUE,
-    ConfigValue VARCHAR(500) NOT NULL,
-    ConfigGroup VARCHAR(50) NULL,
-    DataType VARCHAR(20) NOT NULL DEFAULT 'STRING',
-    Description VARCHAR(255) NULL,
-    IsEditable BIT NOT NULL DEFAULT 1,
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_systemconfig (
+    configid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    configkey varchar(100) NOT NULL UNIQUE,
+    configvalue varchar(500) NOT NULL,
+    configgroup varchar(50) NULL,
+    datatype varchar(20) NOT NULL DEFAULT 'STRING',
+    description varchar(255) NULL,
+    iseditable boolean NOT NULL DEFAULT TRUE,
+    modifieddate timestamp NULL
 );
 
-CREATE TABLE tbl_TaxRule (
-    TaxRuleID INT IDENTITY(1,1) PRIMARY KEY,
-    RuleName VARCHAR(100) NOT NULL,
-    RegionID INT NOT NULL FOREIGN KEY REFERENCES tbl_Region(RegionID),
-    CategoryID INT NULL FOREIGN KEY REFERENCES tbl_Category(CategoryID),
-    TaxRate DECIMAL(5,4) NOT NULL DEFAULT 0.0000,
-    Priority INT NOT NULL DEFAULT 0,
-    StartDate DATE NOT NULL,
-    EndDate DATE NULL,
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    ModifiedDate DATETIME NULL
+CREATE TABLE tbl_taxrule (
+    taxruleid integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    rulename varchar(100) NOT NULL,
+    regionid integer NOT NULL REFERENCES tbl_region(regionid),
+    categoryid integer NULL REFERENCES tbl_category(categoryid),
+    taxrate numeric(5,4) NOT NULL DEFAULT 0.0000,
+    priority integer NOT NULL DEFAULT 0,
+    startdate date NOT NULL,
+    enddate date NULL,
+    isactive boolean NOT NULL DEFAULT TRUE,
+    createddate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modifieddate timestamp NULL
 );
 
-CREATE INDEX IX_Product_SKU ON tbl_Product(SKU);
-CREATE INDEX IX_Product_UPC ON tbl_Product(UPC);
-CREATE INDEX IX_Product_Category ON tbl_Product(CategoryID);
-CREATE INDEX IX_Product_Vendor ON tbl_Product(VendorID);
-CREATE INDEX IX_Product_Status ON tbl_Product(Status);
-CREATE INDEX IX_Inventory_ProductStore ON tbl_Inventory(ProductID, StoreID);
-CREATE INDEX IX_Transaction_Date ON tbl_Transaction(TransactionDate);
-CREATE INDEX IX_Transaction_Store ON tbl_Transaction(StoreID);
-CREATE INDEX IX_Transaction_Customer ON tbl_Transaction(CustomerID);
-CREATE INDEX IX_Transaction_Employee ON tbl_Transaction(EmployeeID);
-CREATE INDEX IX_TransactionItem_Transaction ON tbl_TransactionItem(TransactionID);
-CREATE INDEX IX_TransactionItem_Product ON tbl_TransactionItem(ProductID);
-CREATE INDEX IX_Customer_Number ON tbl_Customer(CustomerNumber);
-CREATE INDEX IX_Customer_Email ON tbl_Customer(Email);
-CREATE INDEX IX_Customer_LastName ON tbl_Customer(LastName);
-CREATE INDEX IX_Employee_Number ON tbl_Employee(EmployeeNumber);
-CREATE INDEX IX_Employee_Store ON tbl_Employee(StoreID);
-CREATE INDEX IX_PurchaseOrder_Vendor ON tbl_PurchaseOrder(VendorID);
-CREATE INDEX IX_PurchaseOrder_Store ON tbl_PurchaseOrder(StoreID);
-CREATE INDEX IX_AuditLog_Table ON tbl_AuditLog(TableName, RecordID);
-CREATE INDEX IX_AuditLog_Date ON tbl_AuditLog(CreatedDate);
-GO
+CREATE INDEX IF NOT EXISTS ix_product_sku ON tbl_product(sku);
+CREATE INDEX IF NOT EXISTS ix_product_upc ON tbl_product(upc);
+CREATE INDEX IF NOT EXISTS ix_product_category ON tbl_product(categoryid);
+CREATE INDEX IF NOT EXISTS ix_product_vendor ON tbl_product(vendorid);
+CREATE INDEX IF NOT EXISTS ix_product_status ON tbl_product(status);
+CREATE INDEX IF NOT EXISTS ix_inventory_productstore ON tbl_inventory(productid, storeid);
+CREATE INDEX IF NOT EXISTS ix_transaction_date ON tbl_transaction(transactiondate);
+CREATE INDEX IF NOT EXISTS ix_transaction_store ON tbl_transaction(storeid);
+CREATE INDEX IF NOT EXISTS ix_transaction_customer ON tbl_transaction(customerid);
+CREATE INDEX IF NOT EXISTS ix_transaction_employee ON tbl_transaction(employeeid);
+CREATE INDEX IF NOT EXISTS ix_transactionitem_transaction ON tbl_transactionitem(transactionid);
+CREATE INDEX IF NOT EXISTS ix_transactionitem_product ON tbl_transactionitem(productid);
+CREATE INDEX IF NOT EXISTS ix_customer_number ON tbl_customer(customernumber);
+CREATE INDEX IF NOT EXISTS ix_customer_email ON tbl_customer(email);
+CREATE INDEX IF NOT EXISTS ix_customer_lastname ON tbl_customer(lastname);
+CREATE INDEX IF NOT EXISTS ix_employee_number ON tbl_employee(employeenumber);
+CREATE INDEX IF NOT EXISTS ix_employee_store ON tbl_employee(storeid);
+CREATE INDEX IF NOT EXISTS ix_purchaseorder_vendor ON tbl_purchaseorder(vendorid);
+CREATE INDEX IF NOT EXISTS ix_purchaseorder_store ON tbl_purchaseorder(storeid);
+CREATE INDEX IF NOT EXISTS ix_auditlog_table ON tbl_auditlog(tablename, recordid);
+CREATE INDEX IF NOT EXISTS ix_auditlog_date ON tbl_auditlog(createddate);
 
-INSERT INTO tbl_SystemConfig (ConfigKey, ConfigValue, ConfigGroup, DataType) VALUES
+INSERT INTO tbl_systemconfig (configkey, configvalue, configgroup, datatype) VALUES
 ('RECEIPT_HEADER', 'RetailCore Systems Inc.', 'RECEIPT', 'STRING'),
 ('RECEIPT_FOOTER', 'Thank you for shopping with us!', 'RECEIPT', 'STRING'),
 ('TAX_INCLUDED_IN_PRICE', '0', 'TAX', 'BOOLEAN'),
@@ -478,4 +468,3 @@ INSERT INTO tbl_SystemConfig (ConfigKey, ConfigValue, ConfigGroup, DataType) VAL
 ('REQUIRE_MANAGER_APPROVAL_AMOUNT', '500.00', 'RETURNS', 'DECIMAL'),
 ('INVENTORY_LOW_STOCK_ALERT', '1', 'INVENTORY', 'BOOLEAN'),
 ('PO_AUTO_APPROVE_LIMIT', '1000.00', 'PURCHASING', 'DECIMAL');
-GO

@@ -18,327 +18,162 @@
       Gift card number: GC-00000001
 */
 
-USE retail;
-GO
+DO $$
+DECLARE
+    region_id integer;
+    department_id integer;
+    sub_department_id integer;
+    category_id integer;
+    sub_category_id integer;
+    vendor_id integer;
+    store_id integer;
+    manager_employee_id integer;
+    product_id integer;
+    second_product_id integer;
+    customer_id integer;
+BEGIN
+    INSERT INTO tbl_region (regionname, regioncode, countrycode, taxrate, isactive)
+    VALUES ('United States West', 'US-WEST', 'US', 0.0825, TRUE)
+    ON CONFLICT (regioncode) DO NOTHING;
 
-SET XACT_ABORT ON;
-GO
+    SELECT regionid INTO region_id
+    FROM tbl_region
+    WHERE regioncode = 'US-WEST';
 
-BEGIN TRY
-    BEGIN TRANSACTION;
+    INSERT INTO tbl_department (departmentname, departmentcode, parentdepartmentid, sortorder, isactive)
+    VALUES ('Grocery', 'GROC', NULL, 1, TRUE)
+    ON CONFLICT (departmentcode) DO NOTHING;
 
-    DECLARE @RegionID INT;
-    DECLARE @DepartmentID INT;
-    DECLARE @SubDepartmentID INT;
-    DECLARE @CategoryID INT;
-    DECLARE @SubCategoryID INT;
-    DECLARE @VendorID INT;
-    DECLARE @StoreID INT;
-    DECLARE @ManagerEmployeeID INT;
-    DECLARE @CashierEmployeeID INT;
-    DECLARE @ProductID INT;
-    DECLARE @SecondProductID INT;
-    DECLARE @CustomerID INT;
+    SELECT departmentid INTO department_id
+    FROM tbl_department
+    WHERE departmentcode = 'GROC';
 
-    /* Region */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Region WHERE RegionCode = 'US-WEST')
-    BEGIN
-        INSERT INTO dbo.tbl_Region
-            (RegionName, RegionCode, CountryCode, TaxRate, IsActive)
-        VALUES
-            ('United States West', 'US-WEST', 'US', 0.0825, 1);
-    END;
+    INSERT INTO tbl_department (departmentname, departmentcode, parentdepartmentid, sortorder, isactive)
+    VALUES ('Snacks', 'SNACK', department_id, 2, TRUE)
+    ON CONFLICT (departmentcode) DO NOTHING;
 
-    SELECT @RegionID = RegionID
-    FROM dbo.tbl_Region
-    WHERE RegionCode = 'US-WEST';
+    SELECT departmentid INTO sub_department_id
+    FROM tbl_department
+    WHERE departmentcode = 'SNACK';
 
-    /* Department hierarchy */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Department WHERE DepartmentCode = 'GROC')
-    BEGIN
-        INSERT INTO dbo.tbl_Department
-            (DepartmentName, DepartmentCode, ParentDepartmentID, SortOrder, IsActive)
-        VALUES
-            ('Grocery', 'GROC', NULL, 1, 1);
-    END;
+    INSERT INTO tbl_category (categoryname, categorycode, departmentid, parentcategoryid, sortorder, isactive)
+    VALUES ('Pantry Staples', 'PANTRY', department_id, NULL, 1, TRUE)
+    ON CONFLICT (categorycode) DO NOTHING;
 
-    SELECT @DepartmentID = DepartmentID
-    FROM dbo.tbl_Department
-    WHERE DepartmentCode = 'GROC';
+    SELECT categoryid INTO category_id
+    FROM tbl_category
+    WHERE categorycode = 'PANTRY';
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Department WHERE DepartmentCode = 'SNACK')
-    BEGIN
-        INSERT INTO dbo.tbl_Department
-            (DepartmentName, DepartmentCode, ParentDepartmentID, SortOrder, IsActive)
-        VALUES
-            ('Snacks', 'SNACK', @DepartmentID, 2, 1);
-    END;
+    INSERT INTO tbl_category (categoryname, categorycode, departmentid, parentcategoryid, sortorder, isactive)
+    VALUES ('Chips and Snacks', 'CHIPS', sub_department_id, category_id, 2, TRUE)
+    ON CONFLICT (categorycode) DO NOTHING;
 
-    SELECT @SubDepartmentID = DepartmentID
-    FROM dbo.tbl_Department
-    WHERE DepartmentCode = 'SNACK';
+    SELECT categoryid INTO sub_category_id
+    FROM tbl_category
+    WHERE categorycode = 'CHIPS';
 
-    /* Category hierarchy */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Category WHERE CategoryCode = 'PANTRY')
-    BEGIN
-        INSERT INTO dbo.tbl_Category
-            (CategoryName, CategoryCode, DepartmentID, ParentCategoryID, SortOrder, IsActive)
-        VALUES
-            ('Pantry Staples', 'PANTRY', @DepartmentID, NULL, 1, 1);
-    END;
+    INSERT INTO tbl_vendor (vendorname, vendorcode, contactname, contactemail, contactphone, city, stateprovince, postalcode, countrycode, paymentterms, leadtimedays, isactive)
+    VALUES ('West Coast Wholesale', 'VEND-001', 'Jordan Lee', 'orders@example.test', '555-0100', 'Portland', 'OR', '97205', 'US', 'Net 30', 7, TRUE)
+    ON CONFLICT (vendorcode) DO NOTHING;
 
-    SELECT @CategoryID = CategoryID
-    FROM dbo.tbl_Category
-    WHERE CategoryCode = 'PANTRY';
+    SELECT vendorid INTO vendor_id
+    FROM tbl_vendor
+    WHERE vendorcode = 'VEND-001';
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Category WHERE CategoryCode = 'CHIPS')
-    BEGIN
-        INSERT INTO dbo.tbl_Category
-            (CategoryName, CategoryCode, DepartmentID, ParentCategoryID, SortOrder, IsActive)
-        VALUES
-            ('Chips and Snacks', 'CHIPS', @SubDepartmentID, @CategoryID, 2, 1);
-    END;
+    INSERT INTO tbl_store (storename, storecode, regionid, address1, city, stateprovince, postalcode, phone, email, manageremployeeid, opendate, squarefootage, storetype, isactive)
+    VALUES ('RetailCore Downtown', 'STORE-001', region_id, '100 Main Street', 'Portland', 'OR', '97205', '555-0110', 'store001@example.test', NULL, '2024-01-01', 12000, 1, TRUE)
+    ON CONFLICT (storecode) DO NOTHING;
 
-    SELECT @SubCategoryID = CategoryID
-    FROM dbo.tbl_Category
-    WHERE CategoryCode = 'CHIPS';
+    SELECT storeid INTO store_id
+    FROM tbl_store
+    WHERE storecode = 'STORE-001';
 
-    /* Vendor */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Vendor WHERE VendorCode = 'VEND-001')
-    BEGIN
-        INSERT INTO dbo.tbl_Vendor
-            (VendorName, VendorCode, ContactName, ContactEmail, ContactPhone,
-             City, StateProvince, PostalCode, CountryCode, PaymentTerms,
-             LeadTimeDays, IsActive)
-        VALUES
-            ('West Coast Wholesale', 'VEND-001', 'Jordan Lee',
-             'orders@example.test', '555-0100', 'Portland', 'OR', '97205',
-             'US', 'Net 30', 7, 1);
-    END;
+    INSERT INTO tbl_product (sku, upc, productname, shortdescription, categoryid, vendorid, brand, unitcost, retailprice, istaxable, isdiscountable, isreturnable, returnwindowdays, minstocklevel, maxstocklevel, reorderpoint, reorderquantity, status)
+    VALUES ('SKU-001', '000000000001', 'Classic Potato Chips', 'Salted potato chips', sub_category_id, vendor_id, 'RetailCore', 1.2500, 2.99, TRUE, TRUE, TRUE, 30, 10, 500, 25, 100, 1)
+    ON CONFLICT (sku) DO NOTHING;
 
-    SELECT @VendorID = VendorID
-    FROM dbo.tbl_Vendor
-    WHERE VendorCode = 'VEND-001';
+    SELECT productid INTO product_id
+    FROM tbl_product
+    WHERE sku = 'SKU-001';
 
-    /* Store is created before employees because Store.ManagerEmployeeID
-       and Employee.StoreID form a circular relationship. */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Store WHERE StoreCode = 'STORE-001')
-    BEGIN
-        INSERT INTO dbo.tbl_Store
-            (StoreName, StoreCode, RegionID, Address1, City, StateProvince,
-             PostalCode, Phone, Email, ManagerEmployeeID, OpenDate,
-             SquareFootage, StoreType, IsActive)
-        VALUES
-            ('RetailCore Downtown', 'STORE-001', @RegionID, '100 Main Street',
-             'Portland', 'OR', '97205', '555-0110', 'store001@example.test',
-             NULL, '2024-01-01', 12000, 1, 1);
-    END;
+    INSERT INTO tbl_product (sku, upc, productname, shortdescription, categoryid, vendorid, brand, unitcost, retailprice, saleprice, salestartdate, saleenddate, istaxable, isdiscountable, isreturnable, returnwindowdays, minstocklevel, maxstocklevel, reorderpoint, reorderquantity, status)
+    VALUES ('SKU-002', '000000000002', 'Organic Tomato Sauce', 'Tomato sauce, 24 oz', category_id, vendor_id, 'RetailCore', 2.0000, 4.49, 3.99, CURRENT_TIMESTAMP - INTERVAL '30 days', CURRENT_TIMESTAMP + INTERVAL '30 days', TRUE, TRUE, TRUE, 30, 10, 500, 25, 100, 1)
+    ON CONFLICT (sku) DO NOTHING;
 
-    SELECT @StoreID = StoreID
-    FROM dbo.tbl_Store
-    WHERE StoreCode = 'STORE-001';
+    SELECT productid INTO second_product_id
+    FROM tbl_product
+    WHERE sku = 'SKU-002';
 
-    /* Products */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Product WHERE SKU = 'SKU-001')
-    BEGIN
-        INSERT INTO dbo.tbl_Product
-            (SKU, UPC, ProductName, ShortDescription, CategoryID, VendorID,
-             Brand, UnitCost, RetailPrice, IsTaxable, IsDiscountable,
-             IsReturnable, ReturnWindowDays, MinStockLevel, MaxStockLevel,
-             ReorderPoint, ReorderQuantity, Status)
-        VALUES
-            ('SKU-001', '000000000001', 'Classic Potato Chips',
-             'Salted potato chips', @SubCategoryID, @VendorID, 'RetailCore',
-             1.2500, 2.99, 1, 1, 1, 30, 10, 500, 25, 100, 1);
-    END;
+    INSERT INTO tbl_employee (employeenumber, firstname, lastname, email, phone, storeid, departmentid, jobtitle, hiredate, hourlyrate, accesslevel, pincode, isactive)
+    VALUES ('E00001', 'Alex', 'Manager', 'alex.manager@example.test', '555-0120', store_id, department_id, 'Store Manager', '2024-01-01', 32.00, 9, '1234', TRUE)
+    ON CONFLICT (employeenumber) DO NOTHING;
 
-    SELECT @ProductID = ProductID
-    FROM dbo.tbl_Product
-    WHERE SKU = 'SKU-001';
+    SELECT employeeid INTO manager_employee_id
+    FROM tbl_employee
+    WHERE employeenumber = 'E00001';
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Product WHERE SKU = 'SKU-002')
-    BEGIN
-        INSERT INTO dbo.tbl_Product
-            (SKU, UPC, ProductName, ShortDescription, CategoryID, VendorID,
-             Brand, UnitCost, RetailPrice, SalePrice, SaleStartDate,
-             SaleEndDate, IsTaxable, IsDiscountable, IsReturnable,
-             ReturnWindowDays, MinStockLevel, MaxStockLevel, ReorderPoint,
-             ReorderQuantity, Status)
-        VALUES
-            ('SKU-002', '000000000002', 'Organic Tomato Sauce',
-             'Tomato sauce, 24 oz', @CategoryID, @VendorID, 'RetailCore',
-             2.0000, 4.49, 3.99, DATEADD(day, -30, GETDATE()),
-             DATEADD(day, 30, GETDATE()), 1, 1, 1, 30, 10, 500, 25, 100, 1);
-    END;
+    INSERT INTO tbl_employee (employeenumber, firstname, lastname, email, phone, storeid, departmentid, jobtitle, hiredate, hourlyrate, accesslevel, pincode, isactive)
+    VALUES ('E00002', 'Sam', 'Cashier', 'sam.cashier@example.test', '555-0121', store_id, department_id, 'Cashier', '2024-02-01', 18.00, 1, '5678', TRUE)
+    ON CONFLICT (employeenumber) DO NOTHING;
 
-    SELECT @SecondProductID = ProductID
-    FROM dbo.tbl_Product
-    WHERE SKU = 'SKU-002';
+    UPDATE tbl_employee
+    SET manageremployeeid = manager_employee_id,
+        modifieddate = CURRENT_TIMESTAMP
+    WHERE employeenumber = 'E00002'
+      AND (manageremployeeid IS NULL OR manageremployeeid <> manager_employee_id);
 
-    /* Employees are inserted without manager links; those links are added
-       after all employee identities exist. */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Employee WHERE EmployeeNumber = 'E00001')
-    BEGIN
-        INSERT INTO dbo.tbl_Employee
-            (EmployeeNumber, FirstName, LastName, Email, Phone, StoreID,
-             DepartmentID, JobTitle, HireDate, HourlyRate, AccessLevel,
-             PinCode, IsActive)
-        VALUES
-            ('E00001', 'Alex', 'Manager', 'alex.manager@example.test',
-             '555-0120', @StoreID, @DepartmentID, 'Store Manager',
-             '2024-01-01', 32.00, 9, '1234', 1);
-    END;
+    UPDATE tbl_store
+    SET manageremployeeid = manager_employee_id,
+        modifieddate = CURRENT_TIMESTAMP
+    WHERE storecode = 'STORE-001'
+      AND (manageremployeeid IS NULL OR manageremployeeid <> manager_employee_id);
 
-    SELECT @ManagerEmployeeID = EmployeeID
-    FROM dbo.tbl_Employee
-    WHERE EmployeeNumber = 'E00001';
+    INSERT INTO tbl_customer (customernumber, firstname, lastname, email, phone, mobilephone, address1, city, stateprovince, postalcode, countrycode, loyaltypoints, loyaltytier, totalspend, visitcount, preferredstoreid, taxexempt, isactive)
+    VALUES ('C00000001', 'Taylor', 'Customer', 'taylor.customer@example.test', '555-0130', '555-0131', '200 Oak Avenue', 'Portland', 'OR', '97205', 'US', 1200, 1, 250.00, 3, store_id, FALSE, TRUE)
+    ON CONFLICT (customernumber) DO NOTHING;
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Employee WHERE EmployeeNumber = 'E00002')
-    BEGIN
-        INSERT INTO dbo.tbl_Employee
-            (EmployeeNumber, FirstName, LastName, Email, Phone, StoreID,
-             DepartmentID, JobTitle, HireDate, HourlyRate, AccessLevel,
-             PinCode, IsActive)
-        VALUES
-            ('E00002', 'Sam', 'Cashier', 'sam.cashier@example.test',
-             '555-0121', @StoreID, @DepartmentID, 'Cashier',
-             '2024-02-01', 18.00, 1, '5678', 1);
-    END;
+    SELECT customerid INTO customer_id
+    FROM tbl_customer
+    WHERE customernumber = 'C00000001';
 
-    SELECT @CashierEmployeeID = EmployeeID
-    FROM dbo.tbl_Employee
-    WHERE EmployeeNumber = 'E00002';
+    INSERT INTO tbl_inventory (productid, storeid, quantityonhand, quantityreserved, quantityonorder, binlocation, aislename, shelfnumber, lastcountdate)
+    VALUES (product_id, store_id, 100, 0, 0, 'A-01-01', 'A', '01', CURRENT_TIMESTAMP)
+    ON CONFLICT DO NOTHING;
 
-    UPDATE dbo.tbl_Employee
-    SET ManagerEmployeeID = @ManagerEmployeeID,
-        ModifiedDate = GETDATE()
-    WHERE EmployeeNumber = 'E00002'
-      AND (ManagerEmployeeID IS NULL OR ManagerEmployeeID <> @ManagerEmployeeID);
+    INSERT INTO tbl_inventory (productid, storeid, quantityonhand, quantityreserved, quantityonorder, binlocation, aislename, shelfnumber, lastcountdate)
+    VALUES (second_product_id, store_id, 75, 0, 0, 'A-02-01', 'A', '02', CURRENT_TIMESTAMP)
+    ON CONFLICT DO NOTHING;
 
-    UPDATE dbo.tbl_Store
-    SET ManagerEmployeeID = @ManagerEmployeeID,
-        ModifiedDate = GETDATE()
-    WHERE StoreCode = 'STORE-001'
-      AND (ManagerEmployeeID IS NULL OR ManagerEmployeeID <> @ManagerEmployeeID);
+    INSERT INTO tbl_promotion (promotionname, promotioncode, description, discounttype, discountvalue, startdate, enddate, usagelimit, applicablestoreid, isstackable, isactive)
+    VALUES ('Ten Percent Off', 'SAVE10', 'Ten percent off eligible products', 1, 10.00, CURRENT_TIMESTAMP - INTERVAL '30 days', CURRENT_TIMESTAMP + INTERVAL '30 days', 1000, store_id, FALSE, TRUE)
+    ON CONFLICT (promotioncode) DO NOTHING;
 
-    /* Customer */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Customer WHERE CustomerNumber = 'C00000001')
-    BEGIN
-        INSERT INTO dbo.tbl_Customer
-            (CustomerNumber, FirstName, LastName, Email, Phone, MobilePhone,
-             Address1, City, StateProvince, PostalCode, CountryCode,
-             LoyaltyPoints, LoyaltyTier, TotalSpend, VisitCount,
-             PreferredStoreID, TaxExempt, IsActive)
-        VALUES
-            ('C00000001', 'Taylor', 'Customer', 'taylor.customer@example.test',
-             '555-0130', '555-0131', '200 Oak Avenue', 'Portland', 'OR',
-             '97205', 'US', 1200, 1, 250.00, 3, @StoreID, 0, 1);
-    END;
+    INSERT INTO tbl_giftcard (cardnumber, pin, originalbalance, currentbalance, purchasedatstoreid, purchasedbycustomerid, purchasedate, status)
+    VALUES ('GC-00000001', '2468', 100.00, 100.00, store_id, customer_id, CURRENT_TIMESTAMP, 1)
+    ON CONFLICT (cardnumber) DO NOTHING;
 
-    SELECT @CustomerID = CustomerID
-    FROM dbo.tbl_Customer
-    WHERE CustomerNumber = 'C00000001';
+    INSERT INTO tbl_taxrule (rulename, regionid, taxrate, priority, startdate, isactive)
+    VALUES ('US West Standard Tax', region_id, 0.0825, 0, '2024-01-01', TRUE)
+    ON CONFLICT DO NOTHING;
+END $$;
 
-    /* Inventory: one row per seeded product/store pair. */
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM dbo.tbl_Inventory
-        WHERE ProductID = @ProductID AND StoreID = @StoreID
-    )
-    BEGIN
-        INSERT INTO dbo.tbl_Inventory
-            (ProductID, StoreID, QuantityOnHand, QuantityReserved,
-             QuantityOnOrder, BinLocation, AisleName, ShelfNumber,
-             LastCountDate)
-        VALUES
-            (@ProductID, @StoreID, 100, 0, 0, 'A-01-01', 'A', '01', GETDATE());
-    END;
-
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM dbo.tbl_Inventory
-        WHERE ProductID = @SecondProductID AND StoreID = @StoreID
-    )
-    BEGIN
-        INSERT INTO dbo.tbl_Inventory
-            (ProductID, StoreID, QuantityOnHand, QuantityReserved,
-             QuantityOnOrder, BinLocation, AisleName, ShelfNumber,
-             LastCountDate)
-        VALUES
-            (@SecondProductID, @StoreID, 75, 0, 0, 'A-02-01', 'A', '02', GETDATE());
-    END;
-
-    /* Promotion */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_Promotion WHERE PromotionCode = 'SAVE10')
-    BEGIN
-        INSERT INTO dbo.tbl_Promotion
-            (PromotionName, PromotionCode, Description, DiscountType,
-             DiscountValue, StartDate, EndDate, UsageLimit, ApplicableStoreID,
-             IsStackable, IsActive)
-        VALUES
-            ('Ten Percent Off', 'SAVE10', 'Ten percent off eligible products',
-             1, 10.00, DATEADD(day, -30, GETDATE()),
-             DATEADD(day, 30, GETDATE()), 1000, @StoreID, 0, 1);
-    END;
-
-    /* Gift card */
-    IF NOT EXISTS (SELECT 1 FROM dbo.tbl_GiftCard WHERE CardNumber = 'GC-00000001')
-    BEGIN
-        INSERT INTO dbo.tbl_GiftCard
-            (CardNumber, PIN, OriginalBalance, CurrentBalance,
-             PurchasedAtStoreID, PurchasedByCustomerID, PurchaseDate, Status)
-        VALUES
-            ('GC-00000001', '2468', 100.00, 100.00, @StoreID, @CustomerID,
-             GETDATE(), 1);
-    END;
-
-    /* Tax rule corresponding to the region's default tax rate. */
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM dbo.tbl_TaxRule
-        WHERE RuleName = 'US West Standard Tax'
-          AND RegionID = @RegionID
-    )
-    BEGIN
-        INSERT INTO dbo.tbl_TaxRule
-            (RuleName, RegionID, TaxRate, Priority, StartDate, IsActive)
-        VALUES
-            ('US West Standard Tax', @RegionID, 0.0825, 0,
-             '2024-01-01', 1);
-    END;
-
-    COMMIT TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF XACT_STATE() <> 0
-        ROLLBACK TRANSACTION;
-
-    THROW;
-END CATCH;
-GO
-
-/* Basic post-seed verification. */
-SELECT 'Region' AS [Entity], COUNT(*) AS [RowCount]
-FROM dbo.tbl_Region
-WHERE RegionCode = 'US-WEST'
+SELECT 'Region' AS entity, COUNT(*) AS rowcount
+FROM tbl_region
+WHERE regioncode = 'US-WEST'
 UNION ALL
-SELECT 'Store' AS [Entity], COUNT(*) AS [RowCount]
-FROM dbo.tbl_Store
-WHERE StoreCode = 'STORE-001'
+SELECT 'Store' AS entity, COUNT(*) AS rowcount
+FROM tbl_store
+WHERE storecode = 'STORE-001'
 UNION ALL
-SELECT 'Products' AS [Entity], COUNT(*) AS [RowCount]
-FROM dbo.tbl_Product
-WHERE SKU IN ('SKU-001', 'SKU-002')
+SELECT 'Products' AS entity, COUNT(*) AS rowcount
+FROM tbl_product
+WHERE sku IN ('SKU-001', 'SKU-002')
 UNION ALL
-SELECT 'Employees' AS [Entity], COUNT(*) AS [RowCount]
-FROM dbo.tbl_Employee
-WHERE EmployeeNumber IN ('E00001', 'E00002')
+SELECT 'Employees' AS entity, COUNT(*) AS rowcount
+FROM tbl_employee
+WHERE employeenumber IN ('E00001', 'E00002')
 UNION ALL
-SELECT 'Inventory' AS [Entity], COUNT(*) AS [RowCount]
-FROM dbo.tbl_Inventory AS i
-INNER JOIN dbo.tbl_Store AS s ON s.StoreID = i.StoreID
-WHERE s.StoreCode = 'STORE-001';
-GO
+SELECT 'Inventory' AS entity, COUNT(*) AS rowcount
+FROM tbl_inventory AS i
+INNER JOIN tbl_store AS s ON s.storeid = i.storeid
+WHERE s.storecode = 'STORE-001';

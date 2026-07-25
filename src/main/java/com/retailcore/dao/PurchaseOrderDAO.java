@@ -74,7 +74,7 @@ public class PurchaseOrderDAO extends BaseDAO<PurchaseOrder> {
             TransactionManager.begin();
             conn = TransactionManager.getConnectionForOperation();
 
-            String poSql = "INSERT INTO [dbo].[tbl_PurchaseOrder] " +
+            String poSql = "INSERT INTO tbl_PurchaseOrder " +
                     "(PONumber, VendorID, StoreID, OrderedByEmployeeID, OrderDate, " +
                     "ExpectedDeliveryDate, SubTotal, ShippingCost, TaxAmount, TotalAmount, Status, Notes) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -102,7 +102,7 @@ public class PurchaseOrderDAO extends BaseDAO<PurchaseOrder> {
             }
             rs.close();
 
-            String itemSql = "INSERT INTO [dbo].[tbl_PurchaseOrderItem] " +
+            String itemSql = "INSERT INTO tbl_PurchaseOrderItem " +
                     "(PurchaseOrderID, ProductID, QuantityOrdered, UnitCost, LineTotal, Status) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -132,8 +132,8 @@ public class PurchaseOrderDAO extends BaseDAO<PurchaseOrder> {
     }
 
     public int approvePurchaseOrder(int poId, int approverEmployeeId) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_PurchaseOrder] SET Status = 2, ApprovedByEmployeeID = ?, " +
-                "ModifiedDate = GETDATE() WHERE PurchaseOrderID = ? AND Status = 1";
+        String sql = "UPDATE tbl_PurchaseOrder SET Status = 2, ApprovedByEmployeeID = ?, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE PurchaseOrderID = ? AND Status = 1";
         return executeUpdate(sql, approverEmployeeId, poId);
     }
 
@@ -141,12 +141,12 @@ public class PurchaseOrderDAO extends BaseDAO<PurchaseOrder> {
         try {
             TransactionManager.begin();
 
-            String updateItems = "UPDATE [dbo].[tbl_PurchaseOrderItem] SET QuantityReceived = QuantityOrdered, " +
-                    "Status = 3, ModifiedDate = GETDATE() WHERE PurchaseOrderID = ?";
+            String updateItems = "UPDATE tbl_PurchaseOrderItem SET QuantityReceived = QuantityOrdered, " +
+                    "Status = 3, ModifiedDate = CURRENT_TIMESTAMP WHERE PurchaseOrderID = ?";
             executeUpdate(updateItems, poId);
 
-            String updatePO = "UPDATE [dbo].[tbl_PurchaseOrder] SET Status = 4, ActualDeliveryDate = GETDATE(), " +
-                    "ModifiedDate = GETDATE() WHERE PurchaseOrderID = ?";
+            String updatePO = "UPDATE tbl_PurchaseOrder SET Status = 4, ActualDeliveryDate = CURRENT_TIMESTAMP, " +
+                    "ModifiedDate = CURRENT_TIMESTAMP WHERE PurchaseOrderID = ?";
             int result = executeUpdate(updatePO, poId);
 
             TransactionManager.commit();
@@ -158,10 +158,10 @@ public class PurchaseOrderDAO extends BaseDAO<PurchaseOrder> {
     }
 
     public String generatePONumber(int storeId) throws SQLException {
-        String sql = "SELECT 'PO-' + RIGHT('000' + CAST(? AS VARCHAR), 3) + '-' + " +
-                "FORMAT(GETDATE(), 'yyyyMMdd') + '-' + " +
-                "RIGHT('000' + CAST(ISNULL(MAX(CAST(RIGHT(PONumber, 3) AS INT)), 0) + 1 AS VARCHAR), 3) " +
-                "FROM [dbo].[tbl_PurchaseOrder] WHERE StoreID = ? AND CAST(OrderDate AS DATE) = CAST(GETDATE() AS DATE)";
+        String sql = "SELECT 'PO-' || RIGHT('000' || CAST(? AS VARCHAR), 3) || '-' || " +
+                "TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD') || '-' || " +
+                "RIGHT('000' || CAST(COALESCE(MAX(CAST(RIGHT(PONumber, 3) AS INT)), 0) + 1 AS VARCHAR), 3) " +
+                "FROM tbl_PurchaseOrder WHERE StoreID = ? AND DATE(OrderDate) = DATE(CURRENT_TIMESTAMP)";
         return executeScalar(sql, String.class, storeId, storeId);
     }
 }

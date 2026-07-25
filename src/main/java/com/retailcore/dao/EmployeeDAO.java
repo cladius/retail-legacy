@@ -67,18 +67,18 @@ public class EmployeeDAO extends BaseDAO<Employee> {
     }
 
     public int terminate(int employeeId) throws SQLException {
-        String sql = "UPDATE [dbo].[tbl_Employee] SET IsActive = 0, TerminationDate = GETDATE(), " +
-                "ModifiedDate = GETDATE() WHERE EmployeeID = ?";
+        String sql = "UPDATE tbl_Employee SET IsActive = 0, TerminationDate = CURRENT_TIMESTAMP, " +
+                "ModifiedDate = CURRENT_TIMESTAMP WHERE EmployeeID = ?";
         return executeUpdate(sql, employeeId);
     }
 
     public List<Map<String, Object>> getEmployeeSalesPerformance(int storeId, java.util.Date startDate, java.util.Date endDate) throws SQLException {
-        String sql = "SELECT e.EmployeeID, e.FirstName + ' ' + e.LastName AS EmployeeName, " +
+        String sql = "SELECT e.EmployeeID, e.FirstName || ' ' || e.LastName AS EmployeeName, " +
                 "COUNT(t.TransactionID) AS TransactionCount, " +
                 "SUM(t.GrandTotal) AS TotalSales, " +
                 "AVG(t.GrandTotal) AS AvgTransaction " +
-                "FROM [dbo].[tbl_Employee] e " +
-                "LEFT JOIN [dbo].[tbl_Transaction] t ON e.EmployeeID = t.EmployeeID " +
+                "FROM tbl_Employee e " +
+                "LEFT JOIN tbl_Transaction t ON e.EmployeeID = t.EmployeeID " +
                 "AND t.TransactionDate BETWEEN ? AND ? AND t.Status = 1 " +
                 "WHERE e.StoreID = ? AND e.IsActive = 1 " +
                 "GROUP BY e.EmployeeID, e.FirstName, e.LastName " +
@@ -87,8 +87,8 @@ public class EmployeeDAO extends BaseDAO<Employee> {
     }
 
     public String generateEmployeeNumber() throws SQLException {
-        String sql = "SELECT 'E' + RIGHT('00000' + CAST(ISNULL(MAX(CAST(SUBSTRING(EmployeeNumber, 2, 5) AS INT)), 0) + 1 AS VARCHAR), 5) " +
-                "FROM [dbo].[tbl_Employee]";
+        String sql = "SELECT 'E' || RIGHT('00000' || CAST(COALESCE(MAX(CAST(SUBSTRING(EmployeeNumber, 2, 5) AS INT)), 0) + 1 AS VARCHAR), 5) " +
+                "FROM tbl_Employee";
         return executeScalar(sql, String.class);
     }
 }

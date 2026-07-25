@@ -61,7 +61,7 @@ public class InventoryService {
                 throw new SQLException("Purchase order not found: " + purchaseOrderId);
             }
 
-            String sql = "SELECT * FROM [dbo].[tbl_PurchaseOrderItem] WHERE PurchaseOrderID = ?";
+            String sql = "SELECT * FROM tbl_PurchaseOrderItem WHERE PurchaseOrderID = ?";
             List<Map<String, Object>> items = poDAO.executeQuery(sql, purchaseOrderId);
 
             for (Map<String, Object> item : items) {

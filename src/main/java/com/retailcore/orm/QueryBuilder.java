@@ -127,7 +127,7 @@ public class QueryBuilder {
         if (selectClause.length() > 0) {
             selectClause.append(", ");
         }
-        selectClause.append(column).append(" AS [").append(alias).append("]");
+        selectClause.append(column).append(" AS ").append(alias);
         return this;
     }
 
@@ -231,7 +231,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] ").append(operator).append(" ?");
+        whereClause.append(column).append(" ").append(operator).append(" ?");
         whereParameters.add(value);
         return this;
     }
@@ -264,7 +264,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] LIKE ?");
+        whereClause.append(column).append(" LIKE ?");
         whereParameters.add(pattern);
         return this;
     }
@@ -273,7 +273,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] NOT LIKE ?");
+        whereClause.append(column).append(" NOT LIKE ?");
         whereParameters.add(pattern);
         return this;
     }
@@ -288,7 +288,7 @@ public class QueryBuilder {
             placeholders.append("?");
             whereParameters.add(values[i]);
         }
-        whereClause.append("[").append(column).append("] IN (").append(placeholders).append(")");
+        whereClause.append(column).append(" IN (").append(placeholders).append(")");
         return this;
     }
 
@@ -302,7 +302,7 @@ public class QueryBuilder {
             placeholders.append("?");
             whereParameters.add(values[i]);
         }
-        whereClause.append("[").append(column).append("] NOT IN (").append(placeholders).append(")");
+        whereClause.append(column).append(" NOT IN (").append(placeholders).append(")");
         return this;
     }
 
@@ -310,7 +310,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] BETWEEN ? AND ?");
+        whereClause.append(column).append(" BETWEEN ? AND ?");
         whereParameters.add(lower);
         whereParameters.add(upper);
         return this;
@@ -320,7 +320,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] IS NULL");
+        whereClause.append(column).append(" IS NULL");
         return this;
     }
 
@@ -328,7 +328,7 @@ public class QueryBuilder {
         if (whereClause.length() > 0) {
             whereClause.append(" AND ");
         }
-        whereClause.append("[").append(column).append("] IS NOT NULL");
+        whereClause.append(column).append(" IS NOT NULL");
         return this;
     }
 
@@ -423,7 +423,7 @@ public class QueryBuilder {
         if (setClause.length() > 0) {
             setClause.append(", ");
         }
-        setClause.append("[").append(column).append("] = ?");
+        setClause.append(column).append(" = ?");
         setParameters.add(value);
         return this;
     }
@@ -432,7 +432,7 @@ public class QueryBuilder {
         if (setClause.length() > 0) {
             setClause.append(", ");
         }
-        setClause.append("[").append(column).append("] = NULL");
+        setClause.append(column).append(" = NULL");
         return this;
     }
 
@@ -440,7 +440,7 @@ public class QueryBuilder {
         if (setClause.length() > 0) {
             setClause.append(", ");
         }
-        setClause.append("[").append(column).append("] = ").append(expression);
+        setClause.append(column).append(" = ").append(expression);
         return this;
     }
 
@@ -449,7 +449,7 @@ public class QueryBuilder {
             insertColumns.append(", ");
             insertValues.append(", ");
         }
-        insertColumns.append("[").append(column).append("]");
+        insertColumns.append(column);
         insertValues.append("?");
         insertParameters.add(value);
         return this;
@@ -462,7 +462,6 @@ public class QueryBuilder {
             case SELECT:
                 sql.append("SELECT ");
                 if (distinct) sql.append("DISTINCT ");
-                if (topCount > 0) sql.append("TOP ").append(topCount).append(" ");
                 if (selectClause.length() > 0) {
                     sql.append(selectClause);
                 } else {
@@ -478,8 +477,15 @@ public class QueryBuilder {
                     if (orderByClause.length() == 0) {
                         sql.append(" ORDER BY (SELECT NULL)");
                     }
-                    sql.append(" OFFSET ").append(offsetCount).append(" ROWS");
-                    sql.append(" FETCH NEXT ").append(fetchCount).append(" ROWS ONLY");
+                    sql.append(" LIMIT ").append(fetchCount).append(" OFFSET ").append(offsetCount);
+                } else if (offsetCount >= 0) {
+                    if (orderByClause.length() == 0) {
+                        sql.append(" ORDER BY (SELECT NULL)");
+                    }
+                    sql.append(" OFFSET ").append(offsetCount);
+                } else if (topCount > 0) {
+                    // PostgreSQL requires LIMIT after the FROM/WHERE clauses.
+                    sql.append(" LIMIT ").append(topCount);
                 }
                 break;
 
