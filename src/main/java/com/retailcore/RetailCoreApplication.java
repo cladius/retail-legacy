@@ -86,6 +86,11 @@ public class RetailCoreApplication {
             System.out.println("RetailCore Application Started");
             System.out.println("Database connection pool initialized");
             System.out.println("Ready to process transactions");
+
+            // Test database connection
+            System.out.println("Testing database connection...");
+            Product product = app.lookupProduct("SKU-001");
+            System.out.println("Product found: " + product.getProductName());
         } catch (SQLException e) {
             System.err.println("Failed to start application: " + e.getMessage());
             e.printStackTrace();

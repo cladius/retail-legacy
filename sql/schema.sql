@@ -1,14 +1,14 @@
 USE master;
 GO
 
-IF EXISTS (SELECT name FROM sys.databases WHERE name = N'RetailCoreDB')
-    DROP DATABASE RetailCoreDB;
+IF EXISTS (SELECT name FROM sys.databases WHERE name = N'retail')
+    DROP DATABASE retail;
 GO
 
-CREATE DATABASE RetailCoreDB;
+CREATE DATABASE retail;
 GO
 
-USE RetailCoreDB;
+USE retail;
 GO
 
 CREATE TABLE tbl_Region (
