@@ -1,0 +1,27 @@
+I've already created an AlloyDB instance. Next steps? [Image #1]
+
+---
+
+I created a public cluster for the DB and configured the connection in src/main/resources/database.properties  I got this error when I run the application RetailCore Application Started
+Database connection pool initialized
+Ready to process transactions
+Testing database connection...
+Failed to start application: ERROR: syntax error at or near "FROM"
+  Position: 18
+org.postgresql.util.PSQLException: ERROR: syntax error at or near "FROM"
+  Position: 18
+        at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+        at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+        at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+        at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+        at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+        at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:194)
+        at org.postgresql.jdbc.PgPreparedStatement.executeQuery(PgPreparedStatement.java:137)
+        at com.retailcore.orm.BaseDAO.findOneByColumn(BaseDAO.java:135)
+        at com.retailcore.dao.ProductDAO.findBySku(ProductDAO.java:34)
+        at com.retailcore.RetailCoreApplication.lookupProduct(RetailCoreApplication.java:37)
+        at com.retailcore.RetailCoreApplication.main(RetailCoreApplication.java:92)
+
+---
+
+make the changes

@@ -1,0 +1,68 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "6b87f4d8775c",
+  "session_id": "019f9930-7ece-7db0-a45f-bad3123affc6",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-25T13:19:26.080326Z",
+  "branch": "migration/alloydb-postgres",
+  "checkpoints_count": 3,
+  "save_step_count": 2,
+  "files_touched": [
+    "src/main/java/com/retailcore/orm/QueryBuilder.java"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.6-luna",
+  "turn_id": "a9751a5c20ce",
+  "checkpoint_transcript_start": 54,
+  "transcript_lines_at_start": 54,
+  "compact_transcript_start": 11,
+  "token_usage": {
+    "input_tokens": 31097,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 539392,
+    "output_tokens": 3531,
+    "api_call_count": 9
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-25T13:19:26.048138Z",
+    "agent_lines": 3,
+    "agent_removed": 1,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 3,
+    "total_lines_changed": 4,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 73,
+      "user_lines_removed": 5,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".codex/config.toml": 3,
+        ".codex/hooks.json": 52,
+        ".vscode/settings.json": 3,
+        "SCRATCHPAD.md": 11,
+        "src/main/resources/database.properties": 4
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 1,
+        "src/main/resources/database.properties": 4
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 73,
+      "agent_lines_removed": 5
+    }
+  ]
+}

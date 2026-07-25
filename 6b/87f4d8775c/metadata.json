@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "6b87f4d8775c",
+  "strategy": "manual-commit",
+  "branch": "migration/alloydb-postgres",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "src/main/java/com/retailcore/orm/QueryBuilder.java"
+  ],
+  "sessions": [
+    {
+      "metadata": "/6b/87f4d8775c/0/metadata.json",
+      "transcript": "/6b/87f4d8775c/0/full.jsonl",
+      "compact_transcript": "/6b/87f4d8775c/0/transcript.jsonl",
+      "content_hash": "/6b/87f4d8775c/0/content_hash.txt",
+      "prompt": "/6b/87f4d8775c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 31097,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 539392,
+    "output_tokens": 3531,
+    "api_call_count": 9
+  }
+}
