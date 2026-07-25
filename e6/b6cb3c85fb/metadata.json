@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "e6b6cb3c85fb",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 8,
+  "files_touched": [
+    "sql/schema.sql",
+    "sql/seed.sql",
+    "src/main/java/com/retailcore/RetailCoreApplication.java",
+    "src/main/resources/database.properties"
+  ],
+  "sessions": [
+    {
+      "metadata": "/e6/b6cb3c85fb/0/metadata.json",
+      "transcript": "/e6/b6cb3c85fb/0/full.jsonl",
+      "compact_transcript": "/e6/b6cb3c85fb/0/transcript.jsonl",
+      "content_hash": "/e6/b6cb3c85fb/0/content_hash.txt",
+      "prompt": "/e6/b6cb3c85fb/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 102159,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 1849088,
+    "output_tokens": 13993,
+    "api_call_count": 29
+  }
+}

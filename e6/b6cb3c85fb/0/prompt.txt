@@ -1,0 +1,45 @@
+analyze the project and come up with steps to create the schema in the DB server + seed data
+
+---
+
+read the sql/schema.sql  and create the seed sql file
+
+---
+
+while creating the DB schema in MSSQL which compatability level to set?
+
+---
+
+cladius@Mac retail-legacy % java -jar target/retail-legacy-1.0.0.jar
+Failed to start application: SQL Server JDBC driver not found
+java.sql.SQLException: SQL Server JDBC driver not found
+        at com.retailcore.orm.ConnectionPool.initialize(ConnectionPool.java:54)
+        at com.retailcore.config.DatabaseConfig.initialize(DatabaseConfig.java:45)
+        at com.retailcore.RetailCoreApplication.startup(RetailCoreApplication.java:23)
+        at com.retailcore.RetailCoreApplication.main(RetailCoreApplication.java:85)
+Caused by: java.lang.ClassNotFoundException: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:387)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:418)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:352)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
+        at java.lang.Class.forName0(Native Method)
+        at java.lang.Class.forName(Class.java:264)
+        at com.retailcore.orm.ConnectionPool.initialize(ConnectionPool.java:52)
+        ... 3 more
+cladius@Mac retail-legacy
+
+---
+
+same error
+
+---
+
+run the mvn and java commands yourself and test it
+
+---
+
+same error
+
+---
+
+add a gitignore file - discard class, jar etc

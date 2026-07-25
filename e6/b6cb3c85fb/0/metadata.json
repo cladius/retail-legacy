@@ -1,0 +1,143 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "e6b6cb3c85fb",
+  "session_id": "019f97c6-7382-7cb0-a805-c444cada2a5c",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-25T07:28:11.30609Z",
+  "branch": "main",
+  "checkpoints_count": 8,
+  "save_step_count": 6,
+  "files_touched": [
+    "sql/schema.sql",
+    "sql/seed.sql",
+    "src/main/java/com/retailcore/RetailCoreApplication.java",
+    "src/main/resources/database.properties"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.6-luna",
+  "turn_id": "0fc7072a63f4",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 102159,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 1849088,
+    "output_tokens": 13993,
+    "api_call_count": 29
+  },
+  "session_metrics": {
+    "turn_count": 8
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-25T07:28:11.289024Z",
+    "agent_lines": 267,
+    "agent_removed": 0,
+    "human_added": 115,
+    "human_modified": 53,
+    "human_removed": 0,
+    "total_committed": 429,
+    "total_lines_changed": 435,
+    "agent_percentage": 61.37931034482759,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 236,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".codex/config.toml": 3,
+        ".codex/hooks.json": 52,
+        "README.md": 171,
+        "SCRATCHPAD.md": 10
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 44,
+      "user_lines_removed": 15,
+      "agent_lines_added": 580,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "SCRATCHPAD.md": 24,
+        "sql/schema.sql": 4,
+        "sql/seed.sql": 6,
+        "src/main/resources/database.properties": 3,
+        "target/classes/database.properties": 7
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 2,
+        "sql/schema.sql": 4,
+        "sql/seed.sql": 6,
+        "src/main/resources/database.properties": 3
+      }
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 37,
+      "user_lines_removed": 8,
+      "agent_lines_added": 709,
+      "agent_lines_removed": 7,
+      "user_added_per_file": {
+        "SCRATCHPAD.md": 24,
+        "sql/seed.sql": 6,
+        "target/classes/database.properties": 7
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 2,
+        "sql/seed.sql": 6
+      }
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 37,
+      "user_lines_removed": 8,
+      "agent_lines_added": 709,
+      "agent_lines_removed": 7,
+      "user_added_per_file": {
+        "SCRATCHPAD.md": 24,
+        "sql/seed.sql": 6,
+        "target/classes/database.properties": 7
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 2,
+        "sql/seed.sql": 6
+      }
+    },
+    {
+      "checkpoint_number": 5,
+      "user_lines_added": 37,
+      "user_lines_removed": 8,
+      "agent_lines_added": 719,
+      "agent_lines_removed": 7,
+      "user_added_per_file": {
+        "SCRATCHPAD.md": 24,
+        "sql/seed.sql": 6,
+        "target/classes/database.properties": 7
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 2,
+        "sql/seed.sql": 6
+      }
+    },
+    {
+      "checkpoint_number": 6,
+      "user_lines_added": 45,
+      "user_lines_removed": 8,
+      "agent_lines_added": 719,
+      "agent_lines_removed": 7,
+      "user_added_per_file": {
+        ".vscode/settings.json": 3,
+        "SCRATCHPAD.md": 24,
+        "sql/seed.sql": 6,
+        "src/main/java/com/retailcore/RetailCoreApplication.java": 5,
+        "target/classes/database.properties": 7
+      },
+      "user_removed_per_file": {
+        "SCRATCHPAD.md": 2,
+        "sql/seed.sql": 6
+      }
+    }
+  ]
+}
